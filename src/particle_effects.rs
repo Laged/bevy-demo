@@ -29,6 +29,11 @@ pub struct ImpactEffect {
     pub lifetime: Timer,
 }
 
+#[derive(Component)]
+pub struct DeathLingerEffect {
+    pub lifetime: Timer,
+}
+
 fn setup_particle_assets(
     mut commands: Commands,
     mut effects: ResMut<Assets<EffectAsset>>,
