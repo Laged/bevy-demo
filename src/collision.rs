@@ -5,6 +5,8 @@ use kd_tree::{KdPoint, KdTree};
 
 use crate::player::{Player, Health};
 use crate::{enemy::Enemy, gun::Bullet, state::GameState};
+use crate::particle_effects::{ImpactEffect, ParticleEffectAssets};
+use bevy_hanabi::prelude::*;
 
 pub struct CollisionPlugin;
 
@@ -72,22 +74,33 @@ fn update_enemy_kd_tree(
 }
 
 fn handle_enemy_bullet_collision(
-    bullet_query: Query<&Transform, With<Bullet>>,
+    mut commands: Commands,
+    bullet_query: Query<(Entity, &Transform), With<Bullet>>,
     tree: Res<EnemyKdTree>,
     mut enemy_query: Query<(&Transform, &mut Enemy), With<Enemy>>,
     config: Res<crate::config_loader::GameConfig>,
+    particle_assets: Res<ParticleEffectAssets>,
 ) {
     if bullet_query.is_empty() || enemy_query.is_empty() {
         return;
     }
 
-    for b_t in bullet_query.iter() {
-        let pos = b_t.translation;
+    for (_bullet_entity, bullet_transform) in bullet_query.iter() {
+        let pos = bullet_transform.translation;
         let enemies = tree.0.within_radius(&[pos.x, pos.y], 50.0);
 
         for e in enemies {
             if let Ok((_, mut enemy)) = enemy_query.get_mut(e.entity) {
                 enemy.health -= config.gun.bullet_damage;
+
+                // Spawn impact effect at bullet position
+                commands.spawn((
+                    ParticleEffect::new(particle_assets.impact_burst.clone()),
+                    Transform::from_translation(pos),
+                    ImpactEffect {
+                        lifetime: Timer::from_seconds(0.5, TimerMode::Once),
+                    },
+                ));
             }
         }
     }
