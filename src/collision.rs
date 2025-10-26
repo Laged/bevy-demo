@@ -98,7 +98,7 @@ fn handle_enemy_bullet_collision(
                     ParticleEffect::new(particle_assets.impact_burst.clone()),
                     Transform::from_translation(pos),
                     ImpactEffect {
-                        lifetime: Timer::from_seconds(0.5, TimerMode::Once),
+                        lifetime: Timer::from_seconds(config.particle_effects.impact_lifetime, TimerMode::Once),
                     },
                 ));
             }

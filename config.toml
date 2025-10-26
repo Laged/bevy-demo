@@ -59,3 +59,15 @@ num_bullets_per_shot = 10
 [colors]
 # Background color (RGB 0-255)
 bg_color = [197, 204, 184]
+
+[particle_effects]
+bullet_trail_emission_rate = 300.0
+bullet_trail_lifetime = 0.25
+bullet_trail_size = 3.0
+bullet_trail_color_r = 0.0
+bullet_trail_color_g = 0.8
+bullet_trail_color_b = 1.0
+
+impact_particle_count = 30
+impact_lifetime = 0.4
+impact_size = 4.0

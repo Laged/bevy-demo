@@ -32,18 +32,29 @@ pub struct ImpactEffect {
 fn setup_particle_assets(
     mut commands: Commands,
     mut effects: ResMut<Assets<EffectAsset>>,
+    config: Res<crate::config_loader::GameConfig>,
 ) {
     // Bullet trail effect - continuous emission
     let mut gradient = bevy_hanabi::Gradient::new();
-    gradient.add_key(0.0, Vec4::new(0.0, 0.8, 1.0, 1.0)); // Bright cyan at spawn
-    gradient.add_key(1.0, Vec4::new(0.0, 0.8, 1.0, 0.0)); // Fade to transparent
+    gradient.add_key(0.0, Vec4::new(
+        config.particle_effects.bullet_trail_color_r,
+        config.particle_effects.bullet_trail_color_g,
+        config.particle_effects.bullet_trail_color_b,
+        1.0
+    )); // Bright color at spawn
+    gradient.add_key(1.0, Vec4::new(
+        config.particle_effects.bullet_trail_color_r,
+        config.particle_effects.bullet_trail_color_g,
+        config.particle_effects.bullet_trail_color_b,
+        0.0
+    )); // Fade to transparent
 
     let writer = ExprWriter::new();
 
     let age = writer.lit(0.).expr();
     let init_age = SetAttributeModifier::new(Attribute::AGE, age);
 
-    let lifetime = writer.lit(0.25).expr(); // 0.25 second trail
+    let lifetime = writer.lit(config.particle_effects.bullet_trail_lifetime).expr();
     let init_lifetime = SetAttributeModifier::new(Attribute::LIFETIME, lifetime);
 
     let init_pos = SetPositionSphereModifier {
@@ -58,7 +69,11 @@ fn setup_particle_assets(
     };
 
     let bullet_trail = effects.add(
-        EffectAsset::new(32768, SpawnerSettings::rate(300.0.into()), writer.finish())
+        EffectAsset::new(
+            32768,
+            SpawnerSettings::rate(config.particle_effects.bullet_trail_emission_rate.into()),
+            writer.finish()
+        )
             .with_name("bullet_trail")
             .init(init_pos)
             .init(init_vel)
@@ -66,7 +81,7 @@ fn setup_particle_assets(
             .init(init_lifetime)
             .render(ColorOverLifetimeModifier::new(gradient))
             .render(SizeOverLifetimeModifier {
-                gradient: bevy_hanabi::Gradient::constant(Vec3::splat(3.0)),
+                gradient: bevy_hanabi::Gradient::constant(Vec3::splat(config.particle_effects.bullet_trail_size)),
                 screen_space_size: false,
             }),
     );
@@ -82,7 +97,7 @@ fn setup_particle_assets(
     let age = writer.lit(0.).expr();
     let init_age = SetAttributeModifier::new(Attribute::AGE, age);
 
-    let lifetime = writer.lit(0.4).expr(); // 0.4 second burst
+    let lifetime = writer.lit(config.particle_effects.impact_lifetime).expr();
     let init_lifetime = SetAttributeModifier::new(Attribute::LIFETIME, lifetime);
 
     let init_pos = SetPositionSphereModifier {
@@ -97,7 +112,11 @@ fn setup_particle_assets(
     };
 
     let impact_burst = effects.add(
-        EffectAsset::new(2048, SpawnerSettings::once(30.0.into()), writer.finish())
+        EffectAsset::new(
+            2048,
+            SpawnerSettings::once((config.particle_effects.impact_particle_count as f32).into()),
+            writer.finish()
+        )
             .with_name("impact_burst")
             .init(init_pos)
             .init(init_vel)
@@ -105,7 +124,7 @@ fn setup_particle_assets(
             .init(init_lifetime)
             .render(ColorOverLifetimeModifier::new(impact_gradient))
             .render(SizeOverLifetimeModifier {
-                gradient: bevy_hanabi::Gradient::constant(Vec3::splat(4.0)),
+                gradient: bevy_hanabi::Gradient::constant(Vec3::splat(config.particle_effects.impact_size)),
                 screen_space_size: false,
             }),
     );

@@ -13,6 +13,7 @@ pub struct GameConfig {
     pub kd_tree: KdTreeConfig,
     pub gun: GunConfig,
     pub colors: ColorsConfig,
+    pub particle_effects: ParticleEffectsConfig,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -87,6 +88,19 @@ pub struct ColorsConfig {
     pub bg_color: [u8; 3],
 }
 
+#[derive(Debug, Deserialize, Clone)]
+pub struct ParticleEffectsConfig {
+    pub bullet_trail_emission_rate: f32,
+    pub bullet_trail_lifetime: f32,
+    pub bullet_trail_size: f32,
+    pub bullet_trail_color_r: f32,
+    pub bullet_trail_color_g: f32,
+    pub bullet_trail_color_b: f32,
+    pub impact_particle_count: u32,
+    pub impact_lifetime: f32,
+    pub impact_size: f32,
+}
+
 impl GameConfig {
     pub fn load() -> Result<Self, Box<dyn std::error::Error>> {
         let config_str = fs::read_to_string("config.toml")?;
@@ -139,16 +153,14 @@ impl Default for GameConfig {
             enemy: EnemyConfig {
                 max_num_enemies: 20000,
                 damage: 1.0,
-                spawn_rate_per_second: 10000,
+                spawn_rate_per_second: 1000,
                 health: 100.0,
                 spawn_interval: 1.0,
                 speed: 1.0,
-                spawn_distance_min: 3000.0,
-                spawn_distance_max: 8000.0,
+                spawn_distance_min: 500.0,
+                spawn_distance_max: 2000.0,
             },
-            kd_tree: KdTreeConfig {
-                refresh_rate: 0.1,
-            },
+            kd_tree: KdTreeConfig { refresh_rate: 0.1 },
             gun: GunConfig {
                 bullet_spawn_interval: 0.1,
                 bullet_time_secs: 0.5,
@@ -158,6 +170,17 @@ impl Default for GameConfig {
             },
             colors: ColorsConfig {
                 bg_color: [197, 204, 184],
+            },
+            particle_effects: ParticleEffectsConfig {
+                bullet_trail_emission_rate: 300.0,
+                bullet_trail_lifetime: 0.25,
+                bullet_trail_size: 3.0,
+                bullet_trail_color_r: 0.0,
+                bullet_trail_color_g: 0.8,
+                bullet_trail_color_b: 1.0,
+                impact_particle_count: 30,
+                impact_lifetime: 0.4,
+                impact_size: 4.0,
             },
         }
     }
