@@ -1,9 +1,9 @@
-use bevy::utils::Duration;
+use std::time::Duration;
 
 use bevy::{prelude::*, time::common_conditions::on_timer};
 use kd_tree::{KdPoint, KdTree};
 
-use crate::player::{Player, PlayerEnemyCollisionEvent};
+use crate::player::{Player, Health};
 use crate::*;
 use crate::{enemy::Enemy, gun::Bullet, state::GameState};
 
@@ -35,16 +35,19 @@ impl Plugin for CollisionPlugin {
 fn handle_enemy_player_collision(
     player_query: Query<&Transform, With<Player>>,
     tree: Res<EnemyKdTree>,
-    mut ew: EventWriter<PlayerEnemyCollisionEvent>,
+    mut player_health: Query<&mut Health, With<Player>>,
 ) {
     if player_query.is_empty() {
         return;
     }
 
-    let player_pos = player_query.single().translation;
+    let Ok(player_transform) = player_query.single() else { return; };
+    let player_pos = player_transform.translation;
     let enemies = tree.0.within_radius(&[player_pos.x, player_pos.y], 50.0);
-    for _ in enemies.iter() {
-        ew.send(PlayerEnemyCollisionEvent);
+    if !enemies.is_empty() {
+        if let Ok(mut health) = player_health.single_mut() {
+            health.0 -= ENEMY_DAMAGE;
+        }
     }
 }
 

@@ -18,36 +18,19 @@ pub enum PlayerState {
     Run,
 }
 
-#[derive(Event)]
-pub struct PlayerEnemyCollisionEvent;
-
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<PlayerEnemyCollisionEvent>().add_systems(
+        app.add_systems(
             Update,
             (
                 handle_player_death,
                 handle_player_input,
-                handle_player_enemy_collision_events,
             )
                 .run_if(in_state(GameState::InGame)),
         );
     }
 }
 
-fn handle_player_enemy_collision_events(
-    mut player_query: Query<&mut Health, With<Player>>,
-    mut events: EventReader<PlayerEnemyCollisionEvent>,
-) {
-    if player_query.is_empty() {
-        return;
-    }
-
-    let mut health = player_query.single_mut();
-    for _ in events.read() {
-        health.0 -= ENEMY_DAMAGE;
-    }
-}
 
 fn handle_player_death(
     player_query: Query<&Health, With<Player>>,
@@ -56,7 +39,7 @@ fn handle_player_death(
     if player_query.is_empty() {
         return;
     }
-    let health = player_query.single();
+    let Ok(health) = player_query.single() else { return; };
     if health.0 <= 0.0 {
         next_state.set(GameState::MainMenu);
     }
@@ -70,7 +53,7 @@ fn handle_player_input(
         return;
     }
 
-    let (mut transform, mut player_state) = player_query.single_mut();
+    let Ok((mut transform, mut player_state)) = player_query.single_mut() else { return; };
     let w_key = keyboard_input.pressed(KeyCode::KeyW) || keyboard_input.pressed(KeyCode::ArrowUp);
     let a_key = keyboard_input.pressed(KeyCode::KeyA) || keyboard_input.pressed(KeyCode::ArrowLeft);
     let s_key = keyboard_input.pressed(KeyCode::KeyS) || keyboard_input.pressed(KeyCode::ArrowDown);

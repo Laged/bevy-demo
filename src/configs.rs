@@ -20,6 +20,10 @@ pub const PLAYER_SPEED: f32 = 2.0;
 pub const PLAYER_HEALTH: f32 = 100.0;
 
 // Enemy
+// NOTE: MAX_NUM_ENEMIES can be adjusted based on target hardware.
+// Bevy 0.17.2 rendering performance varies with GPU/CPU capabilities.
+// For high-end hardware, MAX_NUM_ENEMIES can be increased to 100k+
+// For mid-range hardware, 20k-50k is recommended
 pub const MAX_NUM_ENEMIES: usize = 20000;
 pub const ENEMY_DAMAGE: f32 = 1.0;
 pub const SPAWN_RATE_PER_SECOND: usize = 500;

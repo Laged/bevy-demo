@@ -18,7 +18,7 @@ impl Plugin for FollowCameraPlugin {
 }
 
 fn setup_camera(mut commands: Commands) {
-    commands.spawn(Camera2dBundle::default()).insert(PanCam {
+    commands.spawn(Camera2d::default()).insert(PanCam {
         grab_buttons: vec![],
         ..default()
     });
@@ -32,9 +32,10 @@ fn camera_follow_player(
         return;
     }
 
-    let mut camera_transform = camera_query.single_mut();
-    let player_transform = player_query.single().translation;
-    let (x, y) = (player_transform.x, player_transform.y);
+    let Ok(mut camera_transform) = camera_query.single_mut() else { return; };
+    let Ok(player_transform) = player_query.single() else { return; };
+    let player_pos = player_transform.translation;
+    let (x, y) = (player_pos.x, player_pos.y);
 
     camera_transform.translation = camera_transform.translation.lerp(vec3(x, y, 0.0), 0.1);
 }

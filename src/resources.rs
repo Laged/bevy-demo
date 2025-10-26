@@ -35,9 +35,9 @@ fn load_assets(
     handle.image = Some(asset_server.load(SPRITE_SHEET_PATH));
 
     let layout = TextureAtlasLayout::from_grid(
-        Vec2::new(TILE_W as f32, TILE_H as f32),
-        SPRITE_SHEET_W,
-        SPRITE_SHEET_H,
+        UVec2::new(TILE_W as u32, TILE_H as u32),
+        SPRITE_SHEET_W as u32,
+        SPRITE_SHEET_H as u32,
         None,
         None,
     );
@@ -53,13 +53,14 @@ fn update_cursor_position(
 ) {
     if window_query.is_empty() || camera_query.is_empty() {
         cursor_pos.0 = None;
+        return;
     }
 
-    let (camera, camera_transform) = camera_query.single();
-    let window = window_query.single();
+    let Ok((camera, camera_transform)) = camera_query.single() else { return; };
+    let Ok(window) = window_query.single() else { return; };
     cursor_pos.0 = window
         .cursor_position()
-        .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor))
+        .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor).ok())
         .map(|ray| ray.origin.truncate());
 }
 

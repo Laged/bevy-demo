@@ -15,7 +15,7 @@ struct MainMenuItem;
 
 impl Plugin for GuiPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(FrameTimeDiagnosticsPlugin)
+        app.add_plugins(FrameTimeDiagnosticsPlugin::default())
             .add_systems(OnEnter(GameState::MainMenu), setup_main_menu)
             .add_systems(OnExit(GameState::MainMenu), despawn_main_menu)
             .add_systems(
@@ -33,23 +33,20 @@ impl Plugin for GuiPlugin {
 fn spawn_debug_text(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn((
-            NodeBundle {
-                style: Style {
-                    width: Val::Percent(100.0),
-                    height: Val::Percent(100.0),
-                    align_items: AlignItems::Start,
-                    justify_content: JustifyContent::Start,
-                    flex_direction: FlexDirection::Column,
-                    ..default()
-                },
+            Node {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                align_items: AlignItems::Start,
+                justify_content: JustifyContent::Start,
+                flex_direction: FlexDirection::Column,
                 ..default()
             },
             GameEntity,
         ))
         .with_children(|parent| {
             parent
-                .spawn(NodeBundle {
-                    style: Style {
+                .spawn((
+                    Node {
                         width: Val::Px(345.0),
                         height: Val::Px(125.0),
                         align_items: AlignItems::Center,
@@ -59,20 +56,17 @@ fn spawn_debug_text(mut commands: Commands, asset_server: Res<AssetServer>) {
                         margin: UiRect::px(10.0, 10.0, 10.0, 0.0),
                         ..default()
                     },
-                    background_color: BackgroundColor::from(Color::BLACK.with_a(0.9)),
-                    ..default()
-                })
+                    BackgroundColor::from(Color::BLACK.with_alpha(0.9)),
+                ))
                 .with_children(|parent| {
                     parent.spawn((
-                        TextBundle::from_section(
-                            "Hello Bevy!",
-                            TextStyle {
-                                font: asset_server.load("monogram.ttf"),
-                                font_size: 40.0,
-                                color: Color::WHITE,
-                                ..default()
-                            },
-                        ),
+                        Text::new("Hello Bevy!"),
+                        TextFont {
+                            font: asset_server.load("monogram.ttf"),
+                            font_size: 40.0,
+                            ..default()
+                        },
+                        TextColor::WHITE,
                         DebugText,
                     ));
                 });
@@ -90,32 +84,30 @@ fn update_debug_text(
     }
 
     let num_enemies = enemy_query.iter().count();
-    let player_health = player_query.single().0;
-    let mut text = query.single_mut();
+    let Ok(player_health) = player_query.single() else { return; };
+    let Ok(mut text) = query.single_mut() else { return; };
     if let Some(fps) = diagnostics.get(&FrameTimeDiagnosticsPlugin::FPS) {
         if let Some(value) = fps.smoothed() {
-            text.sections[0].value =
-                format!("Fps: {value:.2}\nEnemies: {num_enemies}\nHealth: {player_health}");
+            text.0 = format!("Fps: {value:.2}\nEnemies: {num_enemies}\nHealth: {}", player_health.0);
         }
     }
 }
 
 fn setup_main_menu(mut commands: Commands) {
     commands
-        .spawn(NodeBundle {
-            style: Style {
+        .spawn((
+            Node {
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
                 ..default()
             },
-            ..default()
-        })
+        ))
         .with_children(|parent| {
             parent
-                .spawn(ButtonBundle {
-                    style: Style {
+                .spawn((
+                    Node {
                         width: Val::Px(150.0),
                         height: Val::Px(65.0),
                         border: UiRect::all(Val::Px(5.0)),
@@ -123,17 +115,18 @@ fn setup_main_menu(mut commands: Commands) {
                         align_items: AlignItems::Center,
                         ..default()
                     },
-                    border_color: BorderColor(Color::BLACK),
-                    ..default()
-                })
+                    BorderColor::from(Color::BLACK),
+                    Button,
+                    BackgroundColor::from(Color::srgb(0.15, 0.15, 0.15)),
+                ))
                 .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        "Play",
-                        TextStyle {
+                    parent.spawn((
+                        Text::new("Play"),
+                        TextFont {
                             font_size: 40.0,
-                            color: Color::BLACK,
                             ..default()
                         },
+                        TextColor::BLACK,
                     ));
                 });
         })
@@ -156,6 +149,6 @@ fn handle_main_menu_buttons(
 
 fn despawn_main_menu(mut commands: Commands, menu_items_query: Query<Entity, With<MainMenuItem>>) {
     for e in menu_items_query.iter() {
-        commands.entity(e).despawn_recursive();
+        commands.entity(e).despawn();
     }
 }
