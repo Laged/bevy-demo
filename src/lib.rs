@@ -6,6 +6,7 @@ pub mod configs;
 pub mod enemy;
 pub mod gui;
 pub mod gun;
+pub mod particle_effects;
 pub mod player;
 pub mod resources;
 pub mod state;
