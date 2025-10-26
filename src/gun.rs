@@ -47,7 +47,7 @@ fn despawn_old_bullets(
 ) {
     for (instant, e) in bullet_query.iter() {
         if instant.0.elapsed().as_secs_f32() > config.gun.bullet_time_secs {
-            commands.entity(e).despawn();
+            commands.entity(e).despawn_recursive();
         }
     }
 }
