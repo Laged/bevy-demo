@@ -51,6 +51,37 @@
 
       packages = forEachSupportedSystem (
         { pkgs }:
+        let
+          isLinux = pkgs.stdenv.isLinux;
+          isDarwin = pkgs.stdenv.isDarwin;
+
+          linuxBuildInputs = with pkgs; [
+            alsa-lib
+            udev
+            libxkbcommon
+            wayland
+            vulkan-loader
+          ];
+
+          darwinBuildInputs = with pkgs; [
+            # Metal for graphics on macOS
+            libiconv
+          ];
+
+          buildInputsBase = with pkgs; [
+            openssl
+          ];
+
+          allBuildInputs = buildInputsBase ++ (if isLinux then linuxBuildInputs else if isDarwin then darwinBuildInputs else []);
+
+          linuxLibraryPath = "${pkgs.lib.makeLibraryPath [
+            pkgs.alsa-lib
+            pkgs.udev
+            pkgs.libxkbcommon
+            pkgs.wayland
+            pkgs.vulkan-loader
+          ]}:$LD_LIBRARY_PATH";
+        in
         {
           default = pkgs.rustPlatform.buildRustPackage {
             pname = "hell-game";
@@ -64,23 +95,12 @@
               gcc
             ];
 
-            buildInputs = with pkgs; [
-              openssl
-              alsa-lib
-              udev
-              libxkbcommon
-              wayland
-              vulkan-loader
-            ];
+            buildInputs = allBuildInputs;
 
-            env = {
-              LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath [
-                pkgs.alsa-lib
-                pkgs.udev
-                pkgs.libxkbcommon
-                pkgs.wayland
-                pkgs.vulkan-loader
-              ]}:$LD_LIBRARY_PATH";
+            env = if isLinux then {
+              LD_LIBRARY_PATH = linuxLibraryPath;
+            } else {
+              # macOS doesn't need LD_LIBRARY_PATH
             };
           };
         }
@@ -102,37 +122,56 @@
 
       devShells = forEachSupportedSystem (
         { pkgs }:
+        let
+          isLinux = pkgs.stdenv.isLinux;
+          isDarwin = pkgs.stdenv.isDarwin;
+
+          linuxPackages = with pkgs; [
+            alsa-lib
+            udev
+            libxkbcommon
+            wayland
+            vulkan-loader
+          ];
+
+          darwinPackages = with pkgs; [
+            # macOS development tools
+            libiconv
+          ];
+
+          basePackages = with pkgs; [
+            rustToolchain
+            gcc
+            openssl
+            pkg-config
+            cargo-deny
+            cargo-edit
+            cargo-watch
+            rust-analyzer
+          ];
+
+          allPackages = basePackages ++ (if isLinux then linuxPackages else if isDarwin then darwinPackages else []);
+
+          linuxLibraryPath = "${pkgs.lib.makeLibraryPath [
+            pkgs.alsa-lib
+            pkgs.udev
+            pkgs.libxkbcommon
+            pkgs.wayland
+            pkgs.vulkan-loader
+          ]}:$LD_LIBRARY_PATH";
+        in
         {
           default = pkgs.mkShell {
-            packages = with pkgs; [
-              rustToolchain
-              gcc
-              openssl
-              pkg-config
-              alsa-lib
-              udev
-              # Wayland/graphics libraries for Bevy on Wayland
-              libxkbcommon
-              wayland
-              # Vulkan support
-              vulkan-loader
-              cargo-deny
-              cargo-edit
-              cargo-watch
-              rust-analyzer
-            ];
+            packages = allPackages;
 
             env = {
               # Required by rust-analyzer
               RUST_SRC_PATH = "${pkgs.rustToolchain}/lib/rustlib/src/rust/library";
-              LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath [
-                pkgs.alsa-lib
-                pkgs.udev
-                pkgs.libxkbcommon
-                pkgs.wayland
-                pkgs.vulkan-loader
-              ]}:$LD_LIBRARY_PATH";
-            };
+            } // (if isLinux then {
+              LD_LIBRARY_PATH = linuxLibraryPath;
+            } else {
+              # macOS doesn't need LD_LIBRARY_PATH
+            });
           };
         }
       );
