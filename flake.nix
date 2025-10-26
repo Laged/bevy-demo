@@ -73,14 +73,6 @@
           ];
 
           allBuildInputs = buildInputsBase ++ (if isLinux then linuxBuildInputs else if isDarwin then darwinBuildInputs else []);
-
-          linuxLibraryPath = "${pkgs.lib.makeLibraryPath [
-            pkgs.alsa-lib
-            pkgs.udev
-            pkgs.libxkbcommon
-            pkgs.wayland
-            pkgs.vulkan-loader
-          ]}:$LD_LIBRARY_PATH";
         in
         {
           default = pkgs.rustPlatform.buildRustPackage {
@@ -98,7 +90,13 @@
             buildInputs = allBuildInputs;
 
             env = if isLinux then {
-              LD_LIBRARY_PATH = linuxLibraryPath;
+              LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath [
+                pkgs.alsa-lib
+                pkgs.udev
+                pkgs.libxkbcommon
+                pkgs.wayland
+                pkgs.vulkan-loader
+              ]}:$LD_LIBRARY_PATH";
             } else {
               # macOS doesn't need LD_LIBRARY_PATH
             };
@@ -151,14 +149,6 @@
           ];
 
           allPackages = basePackages ++ (if isLinux then linuxPackages else if isDarwin then darwinPackages else []);
-
-          linuxLibraryPath = "${pkgs.lib.makeLibraryPath [
-            pkgs.alsa-lib
-            pkgs.udev
-            pkgs.libxkbcommon
-            pkgs.wayland
-            pkgs.vulkan-loader
-          ]}:$LD_LIBRARY_PATH";
         in
         {
           default = pkgs.mkShell {
@@ -168,7 +158,13 @@
               # Required by rust-analyzer
               RUST_SRC_PATH = "${pkgs.rustToolchain}/lib/rustlib/src/rust/library";
             } // (if isLinux then {
-              LD_LIBRARY_PATH = linuxLibraryPath;
+              LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath [
+                pkgs.alsa-lib
+                pkgs.udev
+                pkgs.libxkbcommon
+                pkgs.wayland
+                pkgs.vulkan-loader
+              ]}:$LD_LIBRARY_PATH";
             } else {
               # macOS doesn't need LD_LIBRARY_PATH
             });
