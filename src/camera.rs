@@ -1,5 +1,4 @@
 use bevy::{math::vec3, prelude::*};
-use bevy_pancam::{PanCam, PanCamPlugin};
 
 use crate::player::Player;
 use crate::state::GameState;
@@ -8,8 +7,7 @@ pub struct FollowCameraPlugin;
 
 impl Plugin for FollowCameraPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(PanCamPlugin::default())
-            .add_systems(OnEnter(GameState::Loading), setup_camera)
+        app.add_systems(OnEnter(GameState::Loading), setup_camera)
             .add_systems(
                 Update,
                 camera_follow_player.run_if(in_state(GameState::InGame)),
@@ -18,10 +16,7 @@ impl Plugin for FollowCameraPlugin {
 }
 
 fn setup_camera(mut commands: Commands) {
-    commands.spawn(Camera2dBundle::default()).insert(PanCam {
-        grab_buttons: vec![],
-        ..default()
-    });
+    commands.spawn(Camera2d::default());
 }
 
 fn camera_follow_player(
@@ -32,9 +27,10 @@ fn camera_follow_player(
         return;
     }
 
-    let mut camera_transform = camera_query.single_mut();
-    let player_transform = player_query.single().translation;
-    let (x, y) = (player_transform.x, player_transform.y);
+    let Ok(mut camera_transform) = camera_query.single_mut() else { return; };
+    let Ok(player_transform) = player_query.single() else { return; };
+    let player_pos = player_transform.translation;
+    let (x, y) = (player_pos.x, player_pos.y);
 
     camera_transform.translation = camera_transform.translation.lerp(vec3(x, y, 0.0), 0.1);
 }

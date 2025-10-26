@@ -1,36 +1,32 @@
-# Bevy 2D Shooter
-This is a 2d top-down shooter written in [Rust](https://www.rust-lang.org/) using the [Bevy](https://bevyengine.org/) game engine. It's capable of handling 100K enemies and uses a kd-tree to efficiently handle the collisions.
+# Star Stream Autocode Lab
 
-Link to the tutorial & timelapse video below.
+This project is built on the excellent [bones-ai/bevy-2d-shooter](https://github.com/bones-ai/bevy-2d-shooter) starter template, keeping its performant Bevy/Rust foundations while repurposing the codebase as a training ground for large language models. The new mission is to teach autonomous coding agents how to build a complete game by following the `.md` design blueprints in this repository.
 
 ![screenshot](/screenshot.png)
 
-# Tutorial
-Here's the entire timelapse of the AI learning to drive
+## What We're Building
+- **Game Concept**: *Star Streams* is a Y2K-futurist auto-battler where human drone swarms battle mythic Inari fox-spirits across a hex-grid arena.
+- **Learning Focus**: Agents learn to translate rich design docs into systems code—covering combat math (DPS, EHP, Power Level), AI behaviours, encounter pacing, and UX polish.
+- **Documentation-Driven**: The `docs/` directory contains the complete design canon, indexed in `docs/00_INDEX.md` and broken into lore, combat, gameplay, MVP roadmaps, and technical specs.
 
-[![youtube](https://img.youtube.com/vi/p8d8TKo59LU/0.jpg)](https://youtu.be/p8d8TKo59LU)
-
-# Showcase Video
-[![youtube](https://img.youtube.com/vi/RiKPrOx2jmE/0.jpg)](https://youtu.be/RiKPrOx2jmE)
-
-## Usage
-- Clone the repo
-```bash
-git clone git@github.com:bones-ai/bevy-2d-shooter.git
-cd bevy-2d-shooter
-```
-- Run
+## Getting Started
 ```bash
 cargo run
 ```
 
-## Configurations
-- The project config file is located at `src/configs.rs`
+## Key References
+- `docs/06_GAME_MVP/06_03_IMPLEMENTATION_ROADMAP.md` – week-by-week showcase plan for agents.
+- `docs/02_COMBAT_SYSTEM/` – DPS/EHP formulas and matchup simulations that drive balance.
+- `docs/04_GAMEPLAY_SYSTEMS/` – hex-grid movement, AI state machines, and auto-battler rules.
+- `src/` – Bevy implementation; `src/configs.rs` holds tweakable runtime values.
 
-## Credits
-- Game assets - [https://0x72.itch.io/dungeontileset-ii](https://0x72.itch.io/dungeontileset-ii)
-- Monogram Font - [https://datagoblin.itch.io/monogram](https://datagoblin.itch.io/monogram)
+## Dev Loop for Agents
+1. Study the relevant design doc section.
+2. Implement or extend the matching Bevy system.
+3. Validate behaviour via `cargo test` (where available) and `cargo run`.
+4. Document findings or gaps for the next agent.
 
-## Controls
-- `WASD` for movement
-- Mouse wheel to change camera zoom
+## Controls & Credits
+- `WASD` moves the player drone; mouse wheel adjusts zoom.
+- Assets: [0x72 Dungeon Tileset II](https://0x72.itch.io/dungeontileset-ii)
+- Font: [Monogram](https://datagoblin.itch.io/monogram)

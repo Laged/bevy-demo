@@ -1,4 +1,4 @@
-use bevy::utils::Duration;
+use std::time::Duration;
 use std::f32::consts::PI;
 
 use bevy::math::vec3;
@@ -59,7 +59,8 @@ fn update_enemy_transform(
         return;
     }
 
-    let player_pos = player_query.single().translation;
+    let Ok(player_transform) = player_query.single() else { return; };
+    let player_pos = player_transform.translation;
     for mut transform in enemy_query.iter_mut() {
         let dir = (player_pos - transform.translation).normalize();
         transform.translation += dir * ENEMY_SPEED;
@@ -79,21 +80,22 @@ fn spawn_enemies(
         return;
     }
 
-    let player_pos = player_query.single().translation.truncate();
+    let Ok(player_transform) = player_query.single() else { return; };
+    let player_pos = player_transform.translation.truncate();
     for _ in 0..enemy_spawn_count {
         let (x, y) = get_random_position_around(player_pos);
         let enemy_type = EnemyType::get_rand_enemy();
         commands.spawn((
-            SpriteSheetBundle {
-                texture: handle.image.clone().unwrap(),
-                atlas: TextureAtlas {
+            Sprite {
+                image: handle.image.clone().unwrap(),
+                texture_atlas: Some(TextureAtlas {
                     layout: handle.layout.clone().unwrap(),
                     index: enemy_type.get_base_sprite_index(),
-                },
-                transform: Transform::from_translation(vec3(x, y, 1.0))
-                    .with_scale(Vec3::splat(SPRITE_SCALE_FACTOR)),
+                }),
                 ..default()
             },
+            Transform::from_translation(vec3(x, y, 1.0))
+                .with_scale(Vec3::splat(SPRITE_SCALE_FACTOR)),
             Enemy::default(),
             enemy_type,
             AnimationTimer(Timer::from_seconds(0.08, TimerMode::Repeating)),

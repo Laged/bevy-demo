@@ -1,4 +1,4 @@
-use bevy::utils::Instant;
+use std::time::Instant;
 use std::f32::consts::PI;
 
 use bevy::math::{vec2, vec3};
@@ -58,12 +58,13 @@ fn update_gun_transform(
         return;
     }
 
-    let player_pos = player_query.single().translation.truncate();
+    let Ok(player_transform) = player_query.single() else { return; };
+    let player_pos = player_transform.translation.truncate();
     let cursor_pos = match cursor_pos.0 {
         Some(pos) => pos,
         None => player_pos,
     };
-    let mut gun_transform = gun_query.single_mut();
+    let Ok(mut gun_transform) = gun_query.single_mut() else { return; };
 
     let angle = (player_pos.y - cursor_pos.y).atan2(player_pos.x - cursor_pos.x) + PI;
     gun_transform.rotation = Quat::from_rotation_z(angle);
@@ -89,7 +90,7 @@ fn handle_gun_input(
         return;
     }
 
-    let (gun_transform, mut gun_timer) = gun_query.single_mut();
+    let Ok((gun_transform, mut gun_timer)) = gun_query.single_mut() else { return; };
     let gun_pos = gun_transform.translation.truncate();
     gun_timer.0.tick(time.delta());
 
@@ -109,16 +110,16 @@ fn handle_gun_input(
                 bullet_direction.z,
             );
             commands.spawn((
-                SpriteSheetBundle {
-                    texture: handle.image.clone().unwrap(),
-                    atlas: TextureAtlas {
+                Sprite {
+                    image: handle.image.clone().unwrap(),
+                    texture_atlas: Some(TextureAtlas {
                         layout: handle.layout.clone().unwrap(),
                         index: 16,
-                    },
-                    transform: Transform::from_translation(vec3(gun_pos.x, gun_pos.y, 1.0))
-                        .with_scale(Vec3::splat(SPRITE_SCALE_FACTOR)),
+                    }),
                     ..default()
                 },
+                Transform::from_translation(vec3(gun_pos.x, gun_pos.y, 1.0))
+                    .with_scale(Vec3::splat(SPRITE_SCALE_FACTOR)),
                 Bullet,
                 BulletDirection(dir),
                 SpawnInstant(Instant::now()),

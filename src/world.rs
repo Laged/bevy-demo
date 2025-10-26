@@ -30,15 +30,15 @@ fn init_world(
     mut next_state: ResMut<NextState<GameState>>,
 ) {
     commands.spawn((
-        SpriteSheetBundle {
-            texture: handle.image.clone().unwrap(),
-            atlas: TextureAtlas {
+        Sprite {
+            image: handle.image.clone().unwrap(),
+            texture_atlas: Some(TextureAtlas {
                 layout: handle.layout.clone().unwrap(),
                 index: 0,
-            },
-            transform: Transform::from_scale(Vec3::splat(SPRITE_SCALE_FACTOR)),
+            }),
             ..default()
         },
+        Transform::from_scale(Vec3::splat(SPRITE_SCALE_FACTOR)),
         Player,
         Health(PLAYER_HEALTH),
         PlayerState::default(),
@@ -46,15 +46,15 @@ fn init_world(
         GameEntity,
     ));
     commands.spawn((
-        SpriteSheetBundle {
-            texture: handle.image.clone().unwrap(),
-            atlas: TextureAtlas {
+        Sprite {
+            image: handle.image.clone().unwrap(),
+            texture_atlas: Some(TextureAtlas {
                 layout: handle.layout.clone().unwrap(),
                 index: 17,
-            },
-            transform: Transform::from_scale(Vec3::splat(SPRITE_SCALE_FACTOR)),
+            }),
             ..default()
         },
+        Transform::from_scale(Vec3::splat(SPRITE_SCALE_FACTOR)),
         Gun,
         GunTimer(Stopwatch::new()),
         GameEntity,
@@ -69,16 +69,16 @@ fn spawn_world_decorations(mut commands: Commands, handle: Res<GlobalTextureAtla
         let x = rng.gen_range(-WORLD_W..WORLD_W);
         let y = rng.gen_range(-WORLD_H..WORLD_H);
         commands.spawn((
-            SpriteSheetBundle {
-                texture: handle.image.clone().unwrap(),
-                atlas: TextureAtlas {
+            Sprite {
+                image: handle.image.clone().unwrap(),
+                texture_atlas: Some(TextureAtlas {
                     layout: handle.layout.clone().unwrap(),
                     index: rng.gen_range(24..=25),
-                },
-                transform: Transform::from_translation(vec3(x, y, 0.0))
-                    .with_scale(Vec3::splat(SPRITE_SCALE_FACTOR)),
+                }),
                 ..default()
             },
+            Transform::from_translation(vec3(x, y, 0.0))
+                .with_scale(Vec3::splat(SPRITE_SCALE_FACTOR)),
             GameEntity,
         ));
     }
@@ -89,6 +89,6 @@ fn despawn_all_game_entities(
     all_entities: Query<Entity, With<GameEntity>>,
 ) {
     for e in all_entities.iter() {
-        commands.entity(e).despawn_recursive();
+        commands.entity(e).despawn();
     }
 }
