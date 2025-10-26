@@ -6,9 +6,11 @@ use bevy::prelude::*;
 use bevy::time::Stopwatch;
 use rand::Rng;
 
+use crate::particle_effects::{BulletTrailEmitter, ParticleEffectAssets};
 use crate::player::Player;
 use crate::state::GameState;
 use crate::*;
+use bevy_hanabi::prelude::*;
 
 pub struct GunPlugin;
 
@@ -87,6 +89,7 @@ fn handle_gun_input(
     mouse_button_input: Res<ButtonInput<MouseButton>>,
     handle: Res<GlobalTextureAtlas>,
     config: Res<crate::config_loader::GameConfig>,
+    particle_assets: Res<ParticleEffectAssets>,
 ) {
     if gun_query.is_empty() {
         return;
@@ -122,10 +125,21 @@ fn handle_gun_input(
                 },
                 Transform::from_translation(vec3(gun_pos.x, gun_pos.y, 1.0))
                     .with_scale(Vec3::splat(config.sprites.sprite_scale_factor)),
+                Visibility::default(),
+                InheritedVisibility::default(),
+                ViewVisibility::default(),
                 Bullet,
                 BulletDirection(dir),
                 SpawnInstant(Instant::now()),
-            ));
+            ))
+            .with_children(|parent| {
+                // Spawn trail emitter as child
+                parent.spawn((
+                    ParticleEffect::new(particle_assets.bullet_trail.clone()),
+                    Transform::default(),
+                    BulletTrailEmitter,
+                ));
+            });
         }
     }
 }
