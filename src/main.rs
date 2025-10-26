@@ -1,6 +1,7 @@
 // Starting point: https://github.com/bones-ai/bevy-2d-shooter
 use bevy::prelude::*;
 use bevy::window::WindowResolution;
+use bevy_hanabi::HanabiPlugin;
 
 use hell_game::animation::AnimationPlugin;
 use hell_game::camera::FollowCameraPlugin;
@@ -8,6 +9,7 @@ use hell_game::collision::CollisionPlugin;
 use hell_game::enemy::EnemyPlugin;
 use hell_game::gui::GuiPlugin;
 use hell_game::gun::GunPlugin;
+use hell_game::particle_effects::ParticleEffectsPlugin;
 use hell_game::player::PlayerPlugin;
 use hell_game::state::GameState;
 use hell_game::world::WorldPlugin;
@@ -35,6 +37,7 @@ fn main() {
                     ..default()
                 }),
         )
+        .add_plugins(HanabiPlugin)
         .init_state::<GameState>()
         .insert_resource(ClearColor(Color::srgb_u8(
             config.colors.bg_color[0],
@@ -51,5 +54,6 @@ fn main() {
         .add_plugins(WorldPlugin)
         .add_plugins(EnemyPlugin)
         .add_plugins(CollisionPlugin)
+        .add_plugins(ParticleEffectsPlugin)
         .run();
 }
