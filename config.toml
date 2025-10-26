@@ -43,7 +43,7 @@ health = 100.0
 spawn_interval = 1.0
 speed = 1.0
 # Spawn distance range (min, max) in world units
-spawn_distance_min = 3000.0
+spawn_distance_min = 500.0
 spawn_distance_max = 8000.0
 
 [kd_tree]
@@ -71,3 +71,19 @@ bullet_trail_color_b = 1.0
 impact_particle_count = 30
 impact_lifetime = 0.4
 impact_size = 4.0
+impact_velocity = 50.0
+
+# Death burst config
+death_burst_particle_count = 60
+death_burst_lifetime = 0.4
+death_burst_size = 4.0
+death_burst_velocity = 100.0
+
+# Death lingering effect config
+death_linger_particle_count = 25
+death_linger_lifetime = 1.2
+death_linger_size = 2.0
+death_linger_velocity = 20.0
+
+# Color palette
+color_variant_count = 8

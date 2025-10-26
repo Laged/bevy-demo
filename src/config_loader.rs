@@ -99,6 +99,19 @@ pub struct ParticleEffectsConfig {
     pub impact_particle_count: u32,
     pub impact_lifetime: f32,
     pub impact_size: f32,
+    pub impact_velocity: f32,
+    // Death burst
+    pub death_burst_particle_count: u32,
+    pub death_burst_lifetime: f32,
+    pub death_burst_size: f32,
+    pub death_burst_velocity: f32,
+    // Death linger
+    pub death_linger_particle_count: u32,
+    pub death_linger_lifetime: f32,
+    pub death_linger_size: f32,
+    pub death_linger_velocity: f32,
+    // Palette
+    pub color_variant_count: u32,
 }
 
 impl GameConfig {
@@ -181,6 +194,16 @@ impl Default for GameConfig {
                 impact_particle_count: 30,
                 impact_lifetime: 0.4,
                 impact_size: 4.0,
+                impact_velocity: 50.0,
+                death_burst_particle_count: 60,
+                death_burst_lifetime: 0.4,
+                death_burst_size: 4.0,
+                death_burst_velocity: 100.0,
+                death_linger_particle_count: 25,
+                death_linger_lifetime: 1.2,
+                death_linger_size: 2.0,
+                death_linger_velocity: 20.0,
+                color_variant_count: 8,
             },
         }
     }
