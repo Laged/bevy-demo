@@ -67,8 +67,44 @@ fn setup_particle_assets(
             }),
     );
 
-    // Placeholder for impact burst (next task)
-    let impact_burst = effects.add(EffectAsset::default());
+    // Impact burst effect - one-shot radial explosion
+    let mut impact_gradient = bevy_hanabi::Gradient::new();
+    impact_gradient.add_key(0.0, Vec4::new(1.0, 0.9, 0.3, 1.0)); // Bright yellow-white
+    impact_gradient.add_key(0.5, Vec4::new(1.0, 0.5, 0.0, 0.8)); // Orange
+    impact_gradient.add_key(1.0, Vec4::new(1.0, 0.0, 0.0, 0.0)); // Fade to red transparent
+
+    let writer = ExprWriter::new();
+
+    let age = writer.lit(0.).expr();
+    let init_age = SetAttributeModifier::new(Attribute::AGE, age);
+
+    let lifetime = writer.lit(0.4).expr(); // 0.4 second burst
+    let init_lifetime = SetAttributeModifier::new(Attribute::LIFETIME, lifetime);
+
+    let init_pos = SetPositionSphereModifier {
+        center: writer.lit(Vec3::ZERO).expr(),
+        radius: writer.lit(5.0).expr(),
+        dimension: ShapeDimension::Surface,
+    };
+
+    let init_vel = SetVelocitySphereModifier {
+        center: writer.lit(Vec3::ZERO).expr(),
+        speed: writer.lit(50.0).expr(),
+    };
+
+    let impact_burst = effects.add(
+        EffectAsset::new(2048, SpawnerSettings::once(30.0.into()), writer.finish())
+            .with_name("impact_burst")
+            .init(init_pos)
+            .init(init_vel)
+            .init(init_age)
+            .init(init_lifetime)
+            .render(ColorOverLifetimeModifier::new(impact_gradient))
+            .render(SizeOverLifetimeModifier {
+                gradient: bevy_hanabi::Gradient::constant(Vec3::splat(4.0)),
+                screen_space_size: false,
+            }),
+    );
 
     commands.insert_resource(ParticleEffectAssets {
         bullet_trail,
