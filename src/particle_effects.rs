@@ -7,7 +7,11 @@ pub struct ParticleEffectsPlugin;
 
 impl Plugin for ParticleEffectsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Loading), setup_particle_assets);
+        app.add_systems(OnEnter(GameState::Loading), setup_particle_assets)
+            .add_systems(
+                Update,
+                despawn_finished_impacts.run_if(in_state(GameState::InGame)),
+            );
     }
 }
 
@@ -110,4 +114,17 @@ fn setup_particle_assets(
         bullet_trail,
         impact_burst,
     });
+}
+
+fn despawn_finished_impacts(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut query: Query<(Entity, &mut ImpactEffect)>,
+) {
+    for (entity, mut impact) in query.iter_mut() {
+        impact.lifetime.tick(time.delta());
+        if impact.lifetime.is_finished() {
+            commands.entity(entity).despawn();
+        }
+    }
 }
