@@ -64,6 +64,7 @@
             alsa-lib
             udev
             libxkbcommon
+            wayland
             vulkan-loader
           ];
 
@@ -89,6 +90,7 @@
                 alsa-lib
                 udev
                 libxkbcommon
+                wayland
                 vulkan-loader
               ])}:$LD_LIBRARY_PATH";
             } else {
@@ -133,6 +135,7 @@
             alsa-lib
             udev
             libxkbcommon
+            wayland
             vulkan-loader
           ];
 
@@ -150,6 +153,7 @@
                 alsa-lib
                 udev
                 libxkbcommon
+                wayland
                 vulkan-loader
               ])}:$LD_LIBRARY_PATH";
             } else {
