@@ -34,6 +34,35 @@ pub struct DeathLingerEffect {
     pub lifetime: Timer,
 }
 
+/// Creates a gradient that transitions: base_color (bright) → white (flash) → base_color (transparent)
+fn create_color_gradient(base_color: Color) -> bevy_hanabi::Gradient<Vec4> {
+    let mut gradient = bevy_hanabi::Gradient::new();
+
+    // Convert color to RGBA f32 values
+    let rgba = base_color.to_linear().to_vec4();
+
+    // Start: Base color at full brightness
+    gradient.add_key(0.0, Vec4::new(
+        rgba.x,
+        rgba.y,
+        rgba.z,
+        1.0
+    ));
+
+    // Middle: White flash for pop effect
+    gradient.add_key(0.5, Vec4::new(1.0, 1.0, 1.0, 1.0));
+
+    // End: Base color fading to transparent
+    gradient.add_key(1.0, Vec4::new(
+        rgba.x,
+        rgba.y,
+        rgba.z,
+        0.0
+    ));
+
+    gradient
+}
+
 fn setup_particle_assets(
     mut commands: Commands,
     mut effects: ResMut<Assets<EffectAsset>>,
