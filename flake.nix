@@ -49,6 +49,57 @@
           );
       };
 
+      packages = forEachSupportedSystem (
+        { pkgs }:
+        {
+          default = pkgs.rustPlatform.buildRustPackage {
+            pname = "hell-game";
+            version = "0.1.0";
+            src = self;
+
+            cargoLock.lockFile = ./Cargo.lock;
+
+            nativeBuildInputs = with pkgs; [
+              pkg-config
+              gcc
+            ];
+
+            buildInputs = with pkgs; [
+              openssl
+              alsa-lib
+              udev
+              libxkbcommon
+              wayland
+              vulkan-loader
+            ];
+
+            env = {
+              LD_LIBRARY_PATH = "${pkgs.lib.makeLibraryPath [
+                pkgs.alsa-lib
+                pkgs.udev
+                pkgs.libxkbcommon
+                pkgs.wayland
+                pkgs.vulkan-loader
+              ]}:$LD_LIBRARY_PATH";
+            };
+          };
+        }
+      );
+
+      apps = forEachSupportedSystem (
+        { pkgs }:
+        {
+          default = {
+            type = "app";
+            program = "${self.packages.${pkgs.stdenv.hostPlatform.system}.default}/bin/hell-game";
+            meta = {
+              description = "A Bevy 2D survival shooter";
+              mainProgram = "hell-game";
+            };
+          };
+        }
+      );
+
       devShells = forEachSupportedSystem (
         { pkgs }:
         {
