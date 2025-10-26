@@ -57,22 +57,17 @@
 
           buildInputsBase = with pkgs; [
             openssl
+            pkg-config
           ];
 
-          allBuildInputs = buildInputsBase ++ (
-            if isLinux then (with pkgs; [
-              alsa-lib
-              udev
-              libxkbcommon
-              wayland
-              vulkan-loader
-            ])
-            else if isDarwin then (with pkgs; [
-              # Metal for graphics on macOS
-              libiconv
-            ])
-            else []
-          );
+          linuxBuildInputs = with pkgs; [
+            alsa-lib
+            udev
+            libxkbcommon
+            vulkan-loader
+          ];
+
+          allBuildInputs = if isLinux then buildInputsBase ++ linuxBuildInputs else buildInputsBase;
         in
         {
           default = pkgs.rustPlatform.buildRustPackage {
@@ -94,7 +89,6 @@
                 alsa-lib
                 udev
                 libxkbcommon
-                wayland
                 vulkan-loader
               ])}:$LD_LIBRARY_PATH";
             } else {
@@ -135,20 +129,14 @@
             rust-analyzer
           ];
 
-          allPackages = basePackages ++ (
-            if isLinux then (with pkgs; [
-              alsa-lib
-              udev
-              libxkbcommon
-              wayland
-              vulkan-loader
-            ])
-            else if isDarwin then (with pkgs; [
-              # macOS development tools
-              libiconv
-            ])
-            else []
-          );
+          linuxPackages = with pkgs; [
+            alsa-lib
+            udev
+            libxkbcommon
+            vulkan-loader
+          ];
+
+          allPackages = if isLinux then basePackages ++ linuxPackages else basePackages;
         in
         {
           default = pkgs.mkShell {
@@ -162,7 +150,6 @@
                 alsa-lib
                 udev
                 libxkbcommon
-                wayland
                 vulkan-loader
               ])}:$LD_LIBRARY_PATH";
             } else {
