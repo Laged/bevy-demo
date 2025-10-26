@@ -1,3 +1,4 @@
+// Starting point: https://github.com/bones-ai/bevy-2d-shooter
 use bevy::prelude::*;
 use bevy::window::close_on_esc;
 
