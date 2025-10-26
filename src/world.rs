@@ -6,7 +6,6 @@ use rand::Rng;
 use crate::animation::AnimationTimer;
 use crate::gun::{Gun, GunTimer};
 use crate::player::{Health, Player, PlayerState};
-use crate::*;
 use crate::{state::GameState, GlobalTextureAtlas};
 
 pub struct WorldPlugin;
@@ -28,6 +27,7 @@ fn init_world(
     mut commands: Commands,
     handle: Res<GlobalTextureAtlas>,
     mut next_state: ResMut<NextState<GameState>>,
+    config: Res<crate::config_loader::GameConfig>,
 ) {
     commands.spawn((
         Sprite {
@@ -38,9 +38,9 @@ fn init_world(
             }),
             ..default()
         },
-        Transform::from_scale(Vec3::splat(SPRITE_SCALE_FACTOR)),
+        Transform::from_scale(Vec3::splat(config.sprites.sprite_scale_factor)),
         Player,
-        Health(PLAYER_HEALTH),
+        Health(config.player.health),
         PlayerState::default(),
         AnimationTimer(Timer::from_seconds(0.15, TimerMode::Repeating)),
         GameEntity,
@@ -54,7 +54,7 @@ fn init_world(
             }),
             ..default()
         },
-        Transform::from_scale(Vec3::splat(SPRITE_SCALE_FACTOR)),
+        Transform::from_scale(Vec3::splat(config.sprites.sprite_scale_factor)),
         Gun,
         GunTimer(Stopwatch::new()),
         GameEntity,
@@ -63,11 +63,15 @@ fn init_world(
     next_state.set(GameState::InGame);
 }
 
-fn spawn_world_decorations(mut commands: Commands, handle: Res<GlobalTextureAtlas>) {
+fn spawn_world_decorations(
+    mut commands: Commands,
+    handle: Res<GlobalTextureAtlas>,
+    config: Res<crate::config_loader::GameConfig>,
+) {
     let mut rng = rand::thread_rng();
-    for _ in 0..NUM_WORLD_DECORATIONS {
-        let x = rng.gen_range(-WORLD_W..WORLD_W);
-        let y = rng.gen_range(-WORLD_H..WORLD_H);
+    for _ in 0..config.world.num_world_decorations {
+        let x = rng.gen_range(-config.world.world_width..config.world.world_width);
+        let y = rng.gen_range(-config.world.world_height..config.world.world_height);
         commands.spawn((
             Sprite {
                 image: handle.image.clone().unwrap(),
@@ -78,7 +82,7 @@ fn spawn_world_decorations(mut commands: Commands, handle: Res<GlobalTextureAtla
                 ..default()
             },
             Transform::from_translation(vec3(x, y, 0.0))
-                .with_scale(Vec3::splat(SPRITE_SCALE_FACTOR)),
+                .with_scale(Vec3::splat(config.sprites.sprite_scale_factor)),
             GameEntity,
         ));
     }

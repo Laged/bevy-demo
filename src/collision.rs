@@ -4,7 +4,6 @@ use bevy::{prelude::*, time::common_conditions::on_timer};
 use kd_tree::{KdPoint, KdTree};
 
 use crate::player::{Player, Health};
-use crate::*;
 use crate::{enemy::Enemy, gun::Bullet, state::GameState};
 
 pub struct CollisionPlugin;
@@ -19,13 +18,18 @@ struct EnemyKdTree(KdTree<Collidable>);
 
 impl Plugin for CollisionPlugin {
     fn build(&self, app: &mut App) {
+        // Get config for kd-tree refresh rate
+        let config = app.world().get_resource::<crate::config_loader::GameConfig>()
+            .expect("GameConfig must be inserted before CollisionPlugin");
+        let refresh_rate = config.kd_tree.refresh_rate;
+
         app.insert_resource(EnemyKdTree::default()).add_systems(
             Update,
             (
                 handle_enemy_bullet_collision,
                 handle_enemy_player_collision,
                 update_enemy_kd_tree
-                    .run_if(on_timer(Duration::from_secs_f32(KD_TREE_REFRESH_RATE))),
+                    .run_if(on_timer(Duration::from_secs_f32(refresh_rate))),
             )
                 .run_if(in_state(GameState::InGame)),
         );
@@ -36,6 +40,7 @@ fn handle_enemy_player_collision(
     player_query: Query<&Transform, With<Player>>,
     tree: Res<EnemyKdTree>,
     mut player_health: Query<&mut Health, With<Player>>,
+    config: Res<crate::config_loader::GameConfig>,
 ) {
     if player_query.is_empty() {
         return;
@@ -46,7 +51,7 @@ fn handle_enemy_player_collision(
     let enemies = tree.0.within_radius(&[player_pos.x, player_pos.y], 50.0);
     if !enemies.is_empty() {
         if let Ok(mut health) = player_health.single_mut() {
-            health.0 -= ENEMY_DAMAGE;
+            health.0 -= config.enemy.damage;
         }
     }
 }
@@ -70,6 +75,7 @@ fn handle_enemy_bullet_collision(
     bullet_query: Query<&Transform, With<Bullet>>,
     tree: Res<EnemyKdTree>,
     mut enemy_query: Query<(&Transform, &mut Enemy), With<Enemy>>,
+    config: Res<crate::config_loader::GameConfig>,
 ) {
     if bullet_query.is_empty() || enemy_query.is_empty() {
         return;
@@ -81,7 +87,7 @@ fn handle_enemy_bullet_collision(
 
         for e in enemies {
             if let Ok((_, mut enemy)) = enemy_query.get_mut(e.entity) {
-                enemy.health -= BULLET_DAMAGE;
+                enemy.health -= config.gun.bullet_damage;
             }
         }
     }

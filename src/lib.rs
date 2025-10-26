@@ -1,6 +1,7 @@
 pub mod animation;
 pub mod camera;
 pub mod collision;
+pub mod config_loader;
 pub mod configs;
 pub mod enemy;
 pub mod gui;
@@ -10,6 +11,7 @@ pub mod resources;
 pub mod state;
 pub mod world;
 
+pub use config_loader::GameConfig;
 pub use configs::*;
 pub use resources::*;
 

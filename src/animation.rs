@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    enemy::{Enemy, EnemyType},
+    enemy::Enemy,
     gun::Gun,
     player::{Player, PlayerState},
     state::GameState,
@@ -59,16 +59,23 @@ fn animate_player(
 }
 
 fn animate_enemy(
-    mut enemy_query: Query<(&mut Sprite, &AnimationTimer, &EnemyType), With<Enemy>>,
+    enemy_query: Query<(&Children, &AnimationTimer), With<Enemy>>,
+    mut sprite_query: Query<&mut Sprite>,
+    config: Res<crate::config_loader::GameConfig>,
 ) {
     if enemy_query.is_empty() {
         return;
     }
 
-    for (mut sprite, timer, enemy_type) in enemy_query.iter_mut() {
+    for (children, timer) in enemy_query.iter() {
         if timer.just_finished() {
-            if let Some(ref mut atlas) = sprite.texture_atlas {
-                atlas.index = enemy_type.get_base_sprite_index() + (atlas.index + 1) % 4;
+            // Update both child sprites (base + tint)
+            for child in children.iter() {
+                if let Ok(mut sprite) = sprite_query.get_mut(child) {
+                    if let Some(ref mut atlas) = sprite.texture_atlas {
+                        atlas.index = (atlas.index + 1) % config.enemy_sprites.enemy_animation_frames;
+                    }
+                }
             }
         }
     }
@@ -94,7 +101,8 @@ fn flip_player_sprite_x(
 
 fn flip_enemy_sprite_x(
     player_query: Query<&Transform, With<Player>>,
-    mut enemy_query: Query<(&mut Sprite, &Transform), With<Enemy>>,
+    enemy_query: Query<(&Children, &Transform), With<Enemy>>,
+    mut sprite_query: Query<&mut Sprite>,
 ) {
     if player_query.is_empty() || enemy_query.is_empty() {
         return;
@@ -102,11 +110,15 @@ fn flip_enemy_sprite_x(
 
     let Ok(player_transform) = player_query.single() else { return; };
     let player_pos = player_transform.translation;
-    for (mut sprite, transform) in enemy_query.iter_mut() {
-        if transform.translation.x < player_pos.x {
-            sprite.flip_x = false;
-        } else {
-            sprite.flip_x = true;
+
+    for (children, transform) in enemy_query.iter() {
+        let should_flip = transform.translation.x >= player_pos.x;
+
+        // Flip both child sprites
+        for child in children.iter() {
+            if let Ok(mut sprite) = sprite_query.get_mut(child) {
+                sprite.flip_x = should_flip;
+            }
         }
     }
 }

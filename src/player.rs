@@ -2,7 +2,6 @@ use bevy::math::vec3;
 use bevy::prelude::*;
 
 use crate::state::GameState;
-use crate::*;
 
 pub struct PlayerPlugin;
 
@@ -48,6 +47,7 @@ fn handle_player_death(
 fn handle_player_input(
     mut player_query: Query<(&mut Transform, &mut PlayerState), With<Player>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
+    config: Res<crate::config_loader::GameConfig>,
 ) {
     if player_query.is_empty() {
         return;
@@ -76,7 +76,7 @@ fn handle_player_input(
     delta = delta.normalize();
 
     if delta.is_finite() && (w_key || a_key || s_key || d_key) {
-        transform.translation += vec3(delta.x, delta.y, 0.0) * PLAYER_SPEED;
+        transform.translation += vec3(delta.x, delta.y, 0.0) * config.player.speed;
         transform.translation.z = 10.0;
         *player_state = PlayerState::Run;
     } else {

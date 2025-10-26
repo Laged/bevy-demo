@@ -41,9 +41,10 @@ impl Plugin for GunPlugin {
 fn despawn_old_bullets(
     mut commands: Commands,
     bullet_query: Query<(&SpawnInstant, Entity), With<Bullet>>,
+    config: Res<crate::config_loader::GameConfig>,
 ) {
     for (instant, e) in bullet_query.iter() {
-        if instant.0.elapsed().as_secs_f32() > BULLET_TIME_SECS {
+        if instant.0.elapsed().as_secs_f32() > config.gun.bullet_time_secs {
             commands.entity(e).despawn();
         }
     }
@@ -85,6 +86,7 @@ fn handle_gun_input(
     mut gun_query: Query<(&Transform, &mut GunTimer), With<Gun>>,
     mouse_button_input: Res<ButtonInput<MouseButton>>,
     handle: Res<GlobalTextureAtlas>,
+    config: Res<crate::config_loader::GameConfig>,
 ) {
     if gun_query.is_empty() {
         return;
@@ -100,10 +102,10 @@ fn handle_gun_input(
 
     let mut rng = rand::thread_rng();
     let bullet_direction = gun_transform.local_x();
-    if gun_timer.0.elapsed_secs() >= BULLET_SPAWN_INTERVAL {
+    if gun_timer.0.elapsed_secs() >= config.gun.bullet_spawn_interval {
         gun_timer.0.reset();
 
-        for _ in 0..NUM_BULLETS_PER_SHOT {
+        for _ in 0..config.gun.num_bullets_per_shot {
             let dir = vec3(
                 bullet_direction.x + rng.gen_range(-0.5..0.5),
                 bullet_direction.y + rng.gen_range(-0.5..0.5),
@@ -119,7 +121,7 @@ fn handle_gun_input(
                     ..default()
                 },
                 Transform::from_translation(vec3(gun_pos.x, gun_pos.y, 1.0))
-                    .with_scale(Vec3::splat(SPRITE_SCALE_FACTOR)),
+                    .with_scale(Vec3::splat(config.sprites.sprite_scale_factor)),
                 Bullet,
                 BulletDirection(dir),
                 SpawnInstant(Instant::now()),
@@ -128,13 +130,16 @@ fn handle_gun_input(
     }
 }
 
-fn update_bullets(mut bullet_query: Query<(&mut Transform, &BulletDirection), With<Bullet>>) {
+fn update_bullets(
+    mut bullet_query: Query<(&mut Transform, &BulletDirection), With<Bullet>>,
+    config: Res<crate::config_loader::GameConfig>,
+) {
     if bullet_query.is_empty() {
         return;
     }
 
     for (mut t, dir) in bullet_query.iter_mut() {
-        t.translation += dir.0.normalize() * Vec3::splat(BULLET_SPEED);
+        t.translation += dir.0.normalize() * Vec3::splat(config.gun.bullet_speed);
         t.translation.z = 10.0;
     }
 }

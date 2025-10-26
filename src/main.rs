@@ -14,6 +14,9 @@ use hell_game::world::WorldPlugin;
 use hell_game::*;
 
 fn main() {
+    // Load configuration
+    let config = GameConfig::load_or_default();
+
     App::new()
         .add_plugins(
             DefaultPlugins
@@ -23,7 +26,10 @@ fn main() {
                         // mode: bevy::window::WindowMode::Fullscreen,
                         resizable: true,
                         focused: true,
-                        resolution: WindowResolution::new(WW as u32, WH as u32),
+                        resolution: WindowResolution::new(
+                            config.window.width as u32,
+                            config.window.height as u32
+                        ),
                         ..default()
                     }),
                     ..default()
@@ -31,8 +37,11 @@ fn main() {
         )
         .init_state::<GameState>()
         .insert_resource(ClearColor(Color::srgb_u8(
-            BG_COLOR.0, BG_COLOR.1, BG_COLOR.2,
+            config.colors.bg_color[0],
+            config.colors.bg_color[1],
+            config.colors.bg_color[2],
         )))
+        .insert_resource(config)
         .add_plugins(FollowCameraPlugin)
         .add_plugins(GuiPlugin)
         .add_plugins(GunPlugin)

@@ -10,6 +10,16 @@ pub const TILE_H: usize = 16;
 pub const SPRITE_SHEET_W: usize = 8;
 pub const SPRITE_SHEET_H: usize = 8;
 
+// Enemy Sprites
+pub const ENEMY_SPRITE_SHEET_PATH: &str = "enemy.png";
+pub const ENEMY_BG_PATH: &str = "enemy_bg.png";
+pub const ENEMY_TINT_PATH: &str = "enemy_tint.png";
+pub const ENEMY_TILE_W: usize = 32;
+pub const ENEMY_TILE_H: usize = 32;
+pub const ENEMY_SPRITE_SHEET_W: usize = 8;
+pub const ENEMY_SPRITE_SHEET_H: usize = 1;
+pub const ENEMY_ANIMATION_FRAMES: usize = 8;
+
 // World
 pub const NUM_WORLD_DECORATIONS: usize = 500;
 pub const WORLD_W: f32 = 3000.0;
@@ -26,7 +36,7 @@ pub const PLAYER_HEALTH: f32 = 100.0;
 // For mid-range hardware, 20k-50k is recommended
 pub const MAX_NUM_ENEMIES: usize = 20000;
 pub const ENEMY_DAMAGE: f32 = 1.0;
-pub const SPAWN_RATE_PER_SECOND: usize = 500;
+pub const SPAWN_RATE_PER_SECOND: usize = 10000; // Start with 10k for testing
 pub const ENEMY_HEALTH: f32 = 100.0;
 pub const ENEMY_SPAWN_INTERVAL: f32 = 1.0;
 pub const ENEMY_SPEED: f32 = 1.0;
