@@ -3,6 +3,7 @@
 //! Balance, spawning, combat, state machine
 
 pub mod config;
+pub mod combat;
 
 use bevy::prelude::*;
 

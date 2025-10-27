@@ -1,3 +1,7 @@
+//! Combat system (gun, bullets, shooting) - Owned by Gameplay Agent
+//!
+//! Gun component, bullet spawning, bullet movement, and firing logic
+
 use std::time::Instant;
 use std::f32::consts::PI;
 
