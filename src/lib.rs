@@ -88,6 +88,7 @@ mod tests {
         use crate::gun::GunPlugin;
         use crate::player::{PlayerPlugin, Player, Health};
         use bevy::prelude::*;
+        use std::time::Instant;
 
         println!("\n=== Headless App Creation Test ===");
 
@@ -114,6 +115,7 @@ mod tests {
         assert_eq!(new_state, Some(GameState::InGame));
 
         // Spawn test entities
+        println!("\n--- Entity Setup ---");
         println!("Spawning player at (0, 0, 0) with 100 health...");
         let _player_id = spawn_test_player(&mut app, Vec3::ZERO, 100.0);
 
@@ -125,11 +127,37 @@ mod tests {
         let enemy_count = app.world_mut().query::<&Enemy>().iter(app.world()).count();
         println!("Entity count - Players: {}, Enemies: {}", player_count, enemy_count);
 
-        // Run simulation frames without crashing
-        println!("Running 10 simulation frames...");
-        run_frames(&mut app, 10);
+        // Capture initial state
+        let mut initial_player_pos = Vec3::ZERO;
+        let mut initial_player_health = 0.0;
+        let mut initial_enemy_pos = Vec3::ZERO;
+        let mut initial_enemy_health = 0.0;
 
-        // Check entity state after simulation
+        let mut player_query = app.world_mut().query::<(&Player, &Health, &Transform)>();
+        if let Some((_, health, transform)) = player_query.iter(app.world()).next() {
+            initial_player_pos = transform.translation;
+            initial_player_health = health.0;
+            println!("Player initial state - Pos: {:?}, Health: {}", initial_player_pos, initial_player_health);
+        }
+
+        let mut enemy_query = app.world_mut().query::<(&Enemy, &Transform)>();
+        if let Some((enemy, transform)) = enemy_query.iter(app.world()).next() {
+            initial_enemy_pos = transform.translation;
+            initial_enemy_health = enemy.health;
+            println!("Enemy initial state - Pos: {:?}, Health: {}", initial_enemy_pos, initial_enemy_health);
+        }
+
+        let initial_distance = initial_player_pos.distance(initial_enemy_pos);
+        println!("Initial distance between player and enemy: {:.2}", initial_distance);
+
+        // Run short simulation with performance measurement
+        println!("\n--- Short Simulation (10 frames) ---");
+        let start = Instant::now();
+        run_frames(&mut app, 10);
+        let short_elapsed = start.elapsed();
+        println!("10 frames completed in {:?} ({:.2} fps)", short_elapsed, 10.0 / short_elapsed.as_secs_f64());
+
+        // Check entity state after short simulation
         let player_count_after = app.world_mut().query::<(&Player, &Health, &Transform)>().iter(app.world()).count();
         let enemy_count_after = app.world_mut().query::<(&Enemy, &Transform)>().iter(app.world()).count();
 
@@ -139,15 +167,67 @@ mod tests {
         assert_eq!(player_count_after, 1, "Player should still exist");
         assert_eq!(enemy_count_after, 1, "Enemy should still exist");
 
-        // Check if enemy moved (should move toward player due to update_enemy_transform system)
-        let mut enemy_query = app.world_mut().query::<(&Enemy, &Transform)>();
-        if let Some((_, transform)) = enemy_query.iter(app.world()).next() {
-            let enemy_pos = transform.translation;
-            println!("Enemy final position: {:?}", enemy_pos);
-            // Enemy should have moved slightly toward player (from x=50 toward x=0)
-            assert!(enemy_pos.x < 50.0, "Enemy should have moved toward player (x < 50)");
+        // Check component state after simulation
+        let mut final_player_pos = Vec3::ZERO;
+        let mut final_player_health = 0.0;
+        let mut final_enemy_pos = Vec3::ZERO;
+        let mut final_enemy_health = 0.0;
+
+        let mut player_query = app.world_mut().query::<(&Player, &Health, &Transform)>();
+        if let Some((_, health, transform)) = player_query.iter(app.world()).next() {
+            final_player_pos = transform.translation;
+            final_player_health = health.0;
+            println!("Player final state - Pos: {:?}, Health: {}", final_player_pos, final_player_health);
         }
 
-        println!("=== Test Passed! Headless mode works correctly ===\n");
+        let mut enemy_query = app.world_mut().query::<(&Enemy, &Transform)>();
+        if let Some((enemy, transform)) = enemy_query.iter(app.world()).next() {
+            final_enemy_pos = transform.translation;
+            final_enemy_health = enemy.health;
+            println!("Enemy final state - Pos: {:?}, Health: {}", final_enemy_pos, final_enemy_health);
+        }
+
+        let final_distance = final_player_pos.distance(final_enemy_pos);
+        println!("Final distance between player and enemy: {:.2}", final_distance);
+
+        // Behavior assertions
+        println!("\n--- Behavior Validation ---");
+
+        // Enemy should move toward player (distance decreases)
+        let distance_delta = initial_distance - final_distance;
+        println!("Enemy moved {:.2} units closer to player", distance_delta);
+        assert!(distance_delta > 0.0, "Enemy should move closer to player (distance decreased by {:.2})", distance_delta);
+        assert!(final_enemy_pos.x < initial_enemy_pos.x, "Enemy X position should decrease (moving toward player at x=0)");
+
+        // Player should not move (no input in headless mode)
+        println!("Player position unchanged: {}", initial_player_pos == final_player_pos);
+        assert_eq!(initial_player_pos, final_player_pos, "Player should not move without input");
+
+        // Health should be unchanged (no collision/damage in 10 frames from distance 50)
+        println!("Player health unchanged: {}", initial_player_health == final_player_health);
+        println!("Enemy health unchanged: {}", initial_enemy_health == final_enemy_health);
+        assert_eq!(initial_player_health, final_player_health, "Player health should be unchanged");
+        assert_eq!(initial_enemy_health, final_enemy_health, "Enemy health should be unchanged");
+
+        // Performance benchmark: longer simulation
+        println!("\n--- Performance Benchmark (1000 frames) ---");
+        let start = Instant::now();
+        run_frames(&mut app, 1000);
+        let long_elapsed = start.elapsed();
+        let fps = 1000.0 / long_elapsed.as_secs_f64();
+        println!("1000 frames completed in {:?} ({:.2} fps)", long_elapsed, fps);
+        println!("Average frame time: {:.2} µs", long_elapsed.as_micros() as f64 / 1000.0);
+
+        // Performance assertion
+        assert!(long_elapsed.as_secs_f64() < 1.0, "1000 frames should complete in under 1 second (took {:?})", long_elapsed);
+
+        println!("\n=== Test Passed! Headless mode works correctly ===");
+        println!("Summary:");
+        println!("  ✓ State machine transitions work");
+        println!("  ✓ Entities spawn and persist");
+        println!("  ✓ Enemy AI movement toward player verified");
+        println!("  ✓ Player stationary without input");
+        println!("  ✓ Health systems operational");
+        println!("  ✓ Performance: {:.2} fps on 1000-frame benchmark\n", fps);
     }
 }
