@@ -68,22 +68,22 @@ bullet_trail_color_r = 0.0
 bullet_trail_color_g = 0.8
 bullet_trail_color_b = 1.0
 
-impact_particle_count = 30
-impact_lifetime = 0.4
-impact_size = 4.0
+impact_particle_count = 20
+impact_lifetime = 0.35
+impact_size = 3.5
 impact_velocity = 50.0
 
 # Death burst config
-death_burst_particle_count = 60
-death_burst_lifetime = 0.4
-death_burst_size = 4.0
-death_burst_velocity = 100.0
+death_burst_particle_count = 40
+death_burst_lifetime = 0.3
+death_burst_size = 3.5
+death_burst_velocity = 80.0
 
 # Death lingering effect config
-death_linger_particle_count = 25
-death_linger_lifetime = 1.2
-death_linger_size = 2.0
-death_linger_velocity = 20.0
+death_linger_particle_count = 15
+death_linger_lifetime = 0.8
+death_linger_size = 1.5
+death_linger_velocity = 15.0
 
 # Color palette
 color_variant_count = 8
