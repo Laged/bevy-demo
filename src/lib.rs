@@ -12,16 +12,14 @@ pub mod domains {
 // Entity definitions
 pub mod entities;
 
-pub mod collision;
 pub mod enemy;
 pub mod gun;
 pub mod player;
 pub mod plugin_mode;
-pub mod resources;
-pub mod state;
 pub mod world;
 
-pub use resources::*;
+// Re-export core resources for backward compatibility
+pub use core::resources::*;
 
 // Re-export config types for backward compatibility
 pub use domains::gameplay::config::{GameConfig, *};
@@ -65,6 +63,21 @@ pub mod config_loader {
 // Backward compatibility - re-export configs
 pub mod configs {
     pub use crate::domains::gameplay::config::constants::*;
+}
+
+// Backward compatibility - re-export state
+pub mod state {
+    pub use crate::core::state::*;
+}
+
+// Backward compatibility - re-export collision
+pub mod collision {
+    pub use crate::core::collision::*;
+}
+
+// Backward compatibility - re-export resources
+pub mod resources {
+    pub use crate::core::resources::*;
 }
 
 #[cfg(test)]

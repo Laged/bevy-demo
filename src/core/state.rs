@@ -1,3 +1,7 @@
+//! Game state machine - Owned by Gameplay Agent
+//!
+//! Defines the core game states including choice/pause states
+
 use bevy::prelude::*;
 use crate::core::ChoiceContext;
 

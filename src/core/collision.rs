@@ -1,3 +1,7 @@
+//! Collision detection system - Owned by Gameplay Agent (shared with Graphics for particles)
+//!
+//! KD-tree based spatial indexing for efficient collision detection
+
 use std::time::Duration;
 
 use bevy::{prelude::*, time::common_conditions::on_timer};

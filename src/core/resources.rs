@@ -1,3 +1,7 @@
+//! Shared resources and asset loading - Owned by Gameplay Agent (read by all domains)
+//!
+//! Global texture atlases, cursor position tracking, and asset loading systems
+
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
