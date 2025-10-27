@@ -4,6 +4,8 @@
 
 pub mod hud;
 pub mod camera;
+pub mod pause_menu;
+pub mod settings_panel;
 
 use bevy::prelude::*;
 
