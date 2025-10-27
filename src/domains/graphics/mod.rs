@@ -3,6 +3,7 @@
 //! Particles, animations, sprites
 
 pub mod particles;
+pub mod animation;
 
 use bevy::prelude::*;
 

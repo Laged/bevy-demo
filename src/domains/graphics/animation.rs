@@ -1,3 +1,10 @@
+//! Animation system - Owned by Graphics Agent
+//!
+//! Handles sprite animations and flipping:
+//! - Player idle/run animations
+//! - Enemy animations
+//! - Sprite flipping based on cursor/player position
+
 use bevy::prelude::*;
 
 use crate::{

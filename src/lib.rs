@@ -12,7 +12,6 @@ pub mod domains {
 // Entity definitions
 pub mod entities;
 
-pub mod animation;
 pub mod camera;
 pub mod collision;
 pub mod config_loader;
@@ -44,6 +43,11 @@ pub mod benchmark_config {
 // Backward compatibility - re-export particle_effects
 pub mod particle_effects {
     pub use crate::domains::graphics::particles::*;
+}
+
+// Backward compatibility - re-export animation
+pub mod animation {
+    pub use crate::domains::graphics::animation::*;
 }
 
 #[cfg(test)]
