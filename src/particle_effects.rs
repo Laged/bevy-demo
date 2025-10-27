@@ -10,7 +10,11 @@ impl Plugin for ParticleEffectsPlugin {
         app.add_systems(OnEnter(GameState::Loading), setup_particle_assets)
             .add_systems(
                 Update,
-                despawn_finished_impacts.run_if(in_state(GameState::InGame)),
+                (
+                    despawn_finished_impacts,
+                    despawn_finished_death_linger,
+                )
+                    .run_if(in_state(GameState::InGame)),
             );
     }
 }
@@ -300,6 +304,19 @@ fn despawn_finished_impacts(
     for (entity, mut impact) in query.iter_mut() {
         impact.lifetime.tick(time.delta());
         if impact.lifetime.is_finished() {
+            commands.entity(entity).despawn();
+        }
+    }
+}
+
+fn despawn_finished_death_linger(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut query: Query<(Entity, &mut DeathLingerEffect)>,
+) {
+    for (entity, mut linger) in query.iter_mut() {
+        linger.lifetime.tick(time.delta());
+        if linger.lifetime.is_finished() {
             commands.entity(entity).despawn();
         }
     }
