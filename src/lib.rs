@@ -13,7 +13,6 @@ pub mod domains {
 pub mod entities;
 
 pub mod animation;
-pub mod benchmark_config;
 pub mod camera;
 pub mod collision;
 pub mod config_loader;
@@ -36,6 +35,11 @@ pub use resources::*;
 #[cfg(test)]
 pub mod test_utils {
     pub use crate::domains::testing::*;
+}
+
+// Backward compatibility - re-export benchmark_config
+pub mod benchmark_config {
+    pub use crate::domains::testing::benchmarks::*;
 }
 
 #[cfg(test)]

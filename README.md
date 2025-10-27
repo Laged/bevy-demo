@@ -160,7 +160,7 @@ cargo test -- --nocapture
 cargo test test_headless_app_creation -- --nocapture
 
 # 3. Verify build compiles
-cargo check && cargo build
+cargo check; cargo build
 ```
 
 **What to check in the output:**
@@ -274,9 +274,9 @@ cargo clippy --all-targets --all-features
 4. Run tests and the game locally, then capture outcomes back in the docs for the next agent.
 
 ## Controls & Credits
-- Movement: `W/A/S/D` or arrow keys  
-- Fire: Hold left mouse button  
+- Movement: `W/A/S/D` or arrow keys
+- Fire: Hold left mouse button
 - Camera: Automatically follows the player (PanCam assist)
 
-Assets: [0x72 Dungeon Tileset II](https://0x72.itch.io/dungeontileset-ii)  
+Assets: [0x72 Dungeon Tileset II](https://0x72.itch.io/dungeontileset-ii)
 Font: [Monogram](https://datagoblin.itch.io/monogram)

@@ -1,0 +1,104 @@
+warning: unused variable: `entity`
+   --> src/enemy.rs:116:41
+    |
+116 |     for (enemy, enemy_color, transform, entity) in enemy_query.iter() {
+    |                                         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_entity`
+    |
+    = note: `#[warn(unused_variables)]` on by default
+
+warning: `hell-game` (lib) generated 1 warning
+warning: `hell-game` (lib test) generated 1 warning (1 duplicate)
+    Finished `test` profile [optimized + debuginfo] target(s) in 0.18s
+     Running unittests src/lib.rs (target/debug/deps/hell_game-5d539ac43ecdd8a6)
+
+running 6 tests
+
+========================================
+Performance Benchmark System
+========================================
+
+Benchmark infrastructure ready.
+Wave Configuration:
+  Wave 1: 100 enemies (single wave test)
+  Wave 2: 1,000 enemies
+  Wave 3: 10,000 enemies
+  Wave 4: 20,000 enemies
+  Wave 5: 100,000 enemies
+
+Benchmark Features:
+  ✓ Overpowered player with 8-direction auto-fire
+  ✓ Automatic enemy spawning in waves
+  ✓ Metrics collection per phase (spawn/combat/cleanup)
+  ✓ Peak entity tracking (enemies, bullets, particles)
+  ✓ Frame time analysis for performance assessment
+
+To run full benchmark:
+  1. Uncomment wave configurations in test
+  2. Run: cargo test --release performance_benchmark -- --nocapture
+
+========================================
+
+
+=== Headless App Creation Test ===
+Creating headless app...
+test tests::performance_benchmark ... ok
+test tests::test_configs_are_valid ... ok
+test tests::test_game_state_enum_exists ... ok
+test tests::test_tile_configuration ... ok
+test tests::test_timing_configuration ... ok
+Adding headless plugins (Player, Enemy, Gun)...
+Initial state: Some(Loading)
+Transitioning to InGame state...
+New state: Some(InGame)
+
+--- Entity Setup ---
+Spawning player at (0, 0, 0) with 100 health...
+Spawning enemy at (50, 0, 0) with 50 health...
+Entity count - Players: 1, Enemies: 1
+Player initial state - Pos: Vec3(0.0, 0.0, 0.0), Health: 100
+Enemy initial state - Pos: Vec3(50.0, 0.0, 0.0), Health: 50
+Initial distance between player and enemy: 50.00
+
+--- Short Simulation (10 frames) ---
+10 frames completed in 706.681µs (14150.66 fps)
+After simulation - Players: 1, Enemies: 1
+Player final state - Pos: Vec3(0.0, 0.0, 0.0), Health: 100
+Enemy final state - Pos: Vec3(40.0, 0.0, 0.0), Health: 50
+Final distance between player and enemy: 40.00
+
+--- Behavior Validation ---
+Enemy moved 10.00 units closer to player
+Player position unchanged: true
+Player health unchanged: true
+Enemy health unchanged: true
+
+--- Performance Benchmark (1000 frames) ---
+1000 frames completed in 59.144965ms (16907.61 fps)
+Average frame time: 59.14 µs
+✓ Performance meets gold standard (≥15000 fps, ≤67µs/frame)
+
+=== Test Passed! Headless mode works correctly ===
+Summary:
+  ✓ State machine transitions work
+  ✓ Entities spawn and persist
+  ✓ Enemy AI movement toward player verified
+  ✓ Player stationary without input
+  ✓ Health systems operational
+  ✓ Performance: 16907.61 fps on 1000-frame benchmark
+
+test tests::test_headless_app_creation ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running unittests src/main.rs (target/debug/deps/hell_game-303b546d2ebe4c9d)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests hell_game
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
