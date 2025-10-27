@@ -3,17 +3,19 @@ use bevy::prelude::*;
 use bevy::window::WindowResolution;
 use bevy_hanabi::HanabiPlugin;
 
-use hell_game::animation::AnimationPlugin;
-use hell_game::camera::FollowCameraPlugin;
-use hell_game::collision::CollisionPlugin;
-use hell_game::enemy::EnemyPlugin;
-use hell_game::gui::GuiPlugin;
-use hell_game::gun::GunPlugin;
-use hell_game::particle_effects::ParticleEffectsPlugin;
-use hell_game::player::PlayerPlugin;
-use hell_game::state::GameState;
-use hell_game::world::WorldPlugin;
-use hell_game::*;
+// Core infrastructure
+use hell_game::core::{GameState, CollisionPlugin, ResourcesPlugin};
+
+// Entity plugins
+use hell_game::entities::{PlayerPlugin, EnemyPlugin, WorldPlugin};
+
+// Domain plugins
+use hell_game::domains::ui::{hud::GuiPlugin, camera::FollowCameraPlugin};
+use hell_game::domains::gameplay::combat::GunPlugin;
+use hell_game::domains::graphics::{animation::AnimationPlugin, particles::ParticleEffectsPlugin};
+
+// Re-export config for convenience
+use hell_game::GameConfig;
 
 fn main() {
     // Load configuration
