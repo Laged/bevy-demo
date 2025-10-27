@@ -10,9 +10,24 @@ use crate::particle_effects::{BulletTrailEmitter, ParticleEffectAssets};
 use crate::player::Player;
 use crate::state::GameState;
 use crate::*;
+use crate::plugin_mode::PluginMode;
 use bevy_hanabi::prelude::*;
 
-pub struct GunPlugin;
+pub struct GunPlugin {
+    mode: PluginMode,
+}
+
+impl GunPlugin {
+    pub fn new(mode: PluginMode) -> Self {
+        Self { mode }
+    }
+}
+
+impl Default for GunPlugin {
+    fn default() -> Self {
+        Self::new(PluginMode::default())
+    }
+}
 
 #[derive(Component)]
 pub struct Gun;
@@ -27,16 +42,27 @@ struct BulletDirection(Vec3);
 
 impl Plugin for GunPlugin {
     fn build(&self, app: &mut App) {
+        // Logic systems (always run in both modes)
         app.add_systems(
             Update,
             (
-                update_gun_transform,
                 update_bullets,
-                handle_gun_input,
                 despawn_old_bullets,
             )
                 .run_if(in_state(GameState::InGame)),
         );
+
+        // Rendering systems (only run in Standard mode)
+        if self.mode == PluginMode::Standard {
+            app.add_systems(
+                Update,
+                (
+                    update_gun_transform,
+                    handle_gun_input,
+                )
+                    .run_if(in_state(GameState::InGame)),
+            );
+        }
     }
 }
 
