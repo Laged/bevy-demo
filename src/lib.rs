@@ -20,8 +20,7 @@ pub use core::resources::*;
 // Re-export config types for backward compatibility
 pub use domains::gameplay::config::{GameConfig, *};
 
-// Backward compatibility - re-export test_utils
-#[cfg(test)]
+// Backward compatibility - re-export test_utils (used by integration tests)
 pub mod test_utils {
     pub use crate::domains::testing::*;
 }

@@ -11,12 +11,11 @@ use hell_game::GameConfig;
 
 #[test]
 fn test_pause_menu_toggle_event_headless() {
-    let config = GameConfig::default();
-    let mut app = create_headless_app(config.clone());
+    let mut app = create_headless_app();
     app.add_plugins(PauseMenuPlugin::new(PluginMode::Headless));
 
     // Initialize to InGame state
-    app.world_mut().resource_mut::<NextState<GameState>>().set(GameState::InGame);
+    set_state(&mut app, GameState::InGame);
     app.update();
 
     // Trigger pause toggle
