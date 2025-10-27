@@ -82,36 +82,72 @@ mod tests {
         use crate::test_utils::app::create_headless_app;
         use crate::test_utils::simulation::{set_state, get_state, run_frames};
         use crate::test_utils::entities::{spawn_test_player, spawn_test_enemy};
-        use crate::enemy::EnemyType;
+        use crate::enemy::{EnemyType, Enemy};
         use crate::plugin_mode::PluginMode;
         use crate::enemy::EnemyPlugin;
         use crate::gun::GunPlugin;
-        use crate::player::PlayerPlugin;
+        use crate::player::{PlayerPlugin, Player, Health};
         use bevy::prelude::*;
 
+        println!("\n=== Headless App Creation Test ===");
+
         // Create a headless app
+        println!("Creating headless app...");
         let mut app = create_headless_app();
 
         // Add headless plugins
+        println!("Adding headless plugins (Player, Enemy, Gun)...");
         app.add_plugins(PlayerPlugin::new(PluginMode::Headless))
             .add_plugins(EnemyPlugin::new(PluginMode::Headless))
             .add_plugins(GunPlugin::new(PluginMode::Headless));
 
         // Verify state machine works
-        assert_eq!(get_state::<GameState>(&app), Some(GameState::Loading));
+        let initial_state = get_state::<GameState>(&app);
+        println!("Initial state: {:?}", initial_state);
+        assert_eq!(initial_state, Some(GameState::Loading));
 
         // Transition to InGame
+        println!("Transitioning to InGame state...");
         set_state(&mut app, GameState::InGame);
-        assert_eq!(get_state::<GameState>(&app), Some(GameState::InGame));
+        let new_state = get_state::<GameState>(&app);
+        println!("New state: {:?}", new_state);
+        assert_eq!(new_state, Some(GameState::InGame));
 
         // Spawn test entities
-        let _player = spawn_test_player(&mut app, Vec3::ZERO, 100.0);
-        let _enemy = spawn_test_enemy(&mut app, Vec3::new(50.0, 0.0, 0.0), 50.0, EnemyType::Green);
+        println!("Spawning player at (0, 0, 0) with 100 health...");
+        let _player_id = spawn_test_player(&mut app, Vec3::ZERO, 100.0);
+
+        println!("Spawning enemy at (50, 0, 0) with 50 health...");
+        let _enemy_id = spawn_test_enemy(&mut app, Vec3::new(50.0, 0.0, 0.0), 50.0, EnemyType::Green);
+
+        // Query entities before simulation
+        let player_count = app.world_mut().query::<&Player>().iter(app.world()).count();
+        let enemy_count = app.world_mut().query::<&Enemy>().iter(app.world()).count();
+        println!("Entity count - Players: {}, Enemies: {}", player_count, enemy_count);
 
         // Run simulation frames without crashing
+        println!("Running 10 simulation frames...");
         run_frames(&mut app, 10);
 
-        // If we got here, headless mode works!
-        assert!(true);
+        // Check entity state after simulation
+        let player_count_after = app.world_mut().query::<(&Player, &Health, &Transform)>().iter(app.world()).count();
+        let enemy_count_after = app.world_mut().query::<(&Enemy, &Transform)>().iter(app.world()).count();
+
+        println!("After simulation - Players: {}, Enemies: {}", player_count_after, enemy_count_after);
+
+        // Verify entities still exist
+        assert_eq!(player_count_after, 1, "Player should still exist");
+        assert_eq!(enemy_count_after, 1, "Enemy should still exist");
+
+        // Check if enemy moved (should move toward player due to update_enemy_transform system)
+        let mut enemy_query = app.world_mut().query::<(&Enemy, &Transform)>();
+        if let Some((_, transform)) = enemy_query.iter(app.world()).next() {
+            let enemy_pos = transform.translation;
+            println!("Enemy final position: {:?}", enemy_pos);
+            // Enemy should have moved slightly toward player (from x=50 toward x=0)
+            assert!(enemy_pos.x < 50.0, "Enemy should have moved toward player (x < 50)");
+        }
+
+        println!("=== Test Passed! Headless mode works correctly ===\n");
     }
 }
