@@ -26,3 +26,15 @@ pub struct ChoiceSelectedEvent {
 /// Hide the choice UI
 #[derive(Event)]
 pub struct HideChoiceUIEvent;
+
+/// Pause menu toggled (pause/unpause)
+#[derive(Event, Clone)]
+pub struct PauseMenuToggled;
+
+/// Settings changed in settings panel
+#[derive(Event, Clone)]
+pub struct SettingsChanged {
+    pub volume: f32,
+    pub difficulty: f32,
+    pub particle_count: u32,
+}
