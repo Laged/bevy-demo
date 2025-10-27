@@ -27,10 +27,11 @@ struct WaveConfig {
 
 const BENCHMARK_WAVES: &[WaveConfig] = &[
     WaveConfig { enemy_count: 100 },
-    WaveConfig { enemy_count: 1_000 },
-    WaveConfig { enemy_count: 10_000 },
-    WaveConfig { enemy_count: 20_000 },
-    WaveConfig { enemy_count: 100_000 },
+    // Temporarily testing single wave - will uncomment for full run
+    // WaveConfig { enemy_count: 1_000 },
+    // WaveConfig { enemy_count: 10_000 },
+    // WaveConfig { enemy_count: 20_000 },
+    // WaveConfig { enemy_count: 100_000 },
 ];
 
 impl BenchmarkState {
