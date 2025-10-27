@@ -32,8 +32,11 @@ pub use config_loader::GameConfig;
 pub use configs::*;
 pub use resources::*;
 
+// Backward compatibility - re-export test_utils
 #[cfg(test)]
-pub mod test_utils;
+pub mod test_utils {
+    pub use crate::domains::testing::*;
+}
 
 #[cfg(test)]
 mod tests {
