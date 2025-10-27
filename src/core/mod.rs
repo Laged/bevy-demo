@@ -4,3 +4,9 @@
 
 pub mod events;
 pub mod choice_system;
+
+// Re-export commonly used types
+pub use choice_system::{
+    ChoiceContext, ChoiceOption, ChoiceType, ChoiceHandler,
+    ChoiceHandlerRegistry, PendingChoice, ChoiceMetadata,
+};
