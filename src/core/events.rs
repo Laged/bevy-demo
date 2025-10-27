@@ -38,3 +38,9 @@ pub struct SettingsChanged {
     pub difficulty: f32,
     pub particle_count: u32,
 }
+
+/// Minimap camera is ready and positioned
+#[derive(Event, Clone)]
+pub struct MinimapCameraReady {
+    pub camera_entity: Entity,
+}
