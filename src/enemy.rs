@@ -9,6 +9,8 @@ use crate::animation::AnimationTimer;
 use crate::player::Player;
 use crate::state::GameState;
 use crate::world::GameEntity;
+use crate::particle_effects::{ParticleEffectAssets, DeathLingerEffect, ImpactEffect, find_closest_effect_variant};
+use bevy_hanabi::prelude::*;
 use crate::*;
 
 pub struct EnemyPlugin;
@@ -56,14 +58,53 @@ impl Plugin for EnemyPlugin {
     }
 }
 
-fn despawn_dead_enemies(mut commands: Commands, enemy_query: Query<(&Enemy, Entity), With<Enemy>>) {
+fn despawn_dead_enemies(
+    mut commands: Commands,
+    enemy_query: Query<(&Enemy, &EnemyColor, &Transform, Entity), With<Enemy>>,
+    particle_assets: Res<ParticleEffectAssets>,
+    config: Res<crate::config_loader::GameConfig>,
+) {
     if enemy_query.is_empty() {
         return;
     }
 
-    for (enemy, entity) in enemy_query.iter() {
+    for (enemy, enemy_color, transform, entity) in enemy_query.iter() {
         if enemy.health <= 0.0 {
-            commands.entity(entity).despawn();
+            let pos = transform.translation;
+
+            // Spawn colored death burst (large explosion)
+            let death_effect = find_closest_effect_variant(
+                enemy_color.0,
+                &particle_assets.death_burst_variants,
+            );
+
+            commands.spawn((
+                ParticleEffect::new(death_effect),
+                Transform::from_translation(pos),
+                ImpactEffect {
+                    lifetime: Timer::from_seconds(
+                        config.particle_effects.death_burst_lifetime,
+                        TimerMode::Once
+                    ),
+                },
+            ));
+
+            // Spawn lingering smoke effect (white/gray, slow upward)
+            commands.spawn((
+                ParticleEffect::new(particle_assets.death_linger.clone()),
+                Transform::from_translation(pos),
+                DeathLingerEffect {
+                    lifetime: Timer::from_seconds(
+                        config.particle_effects.death_linger_lifetime,
+                        TimerMode::Once
+                    ),
+                },
+            ));
+
+            // Despawn enemy with its sprite children
+            let mut entity_commands = commands.entity(entity);
+            entity_commands.despawn_children();
+            entity_commands.despawn();
         }
     }
 }
