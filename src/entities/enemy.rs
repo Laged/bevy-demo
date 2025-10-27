@@ -1,3 +1,7 @@
+//! Enemy entity definition - Owned by Gameplay Agent
+//!
+//! Enemy component, types (Green/Red/Skin), spawning logic, AI movement, and death effects
+
 use std::time::Duration;
 use std::f32::consts::PI;
 

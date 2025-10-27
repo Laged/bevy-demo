@@ -12,11 +12,8 @@ pub mod domains {
 // Entity definitions
 pub mod entities;
 
-pub mod enemy;
 pub mod gun;
-pub mod player;
 pub mod plugin_mode;
-pub mod world;
 
 // Re-export core resources for backward compatibility
 pub use core::resources::*;
@@ -78,6 +75,19 @@ pub mod collision {
 // Backward compatibility - re-export resources
 pub mod resources {
     pub use crate::core::resources::*;
+}
+
+// Backward compatibility - re-export entities
+pub mod player {
+    pub use crate::entities::player::*;
+}
+
+pub mod enemy {
+    pub use crate::entities::enemy::*;
+}
+
+pub mod world {
+    pub use crate::entities::world::*;
 }
 
 #[cfg(test)]

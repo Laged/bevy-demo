@@ -1,3 +1,7 @@
+//! World decoration and initialization - Owned by Gameplay Agent
+//!
+//! World setup, decoration generation, and GameEntity marker component
+
 use bevy::math::vec3;
 use bevy::prelude::*;
 use bevy::time::Stopwatch;

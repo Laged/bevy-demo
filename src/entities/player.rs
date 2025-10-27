@@ -1,3 +1,7 @@
+//! Player entity definition - Owned by Gameplay Agent
+//!
+//! Player component, health, state (Idle/Run), movement, and collision handling
+
 use bevy::math::vec3;
 use bevy::prelude::*;
 
