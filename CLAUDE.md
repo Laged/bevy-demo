@@ -133,6 +133,125 @@ A `flake.nix` is provided for reproducible development. It includes:
 
 Enter the environment with `nix develop` (or `nix flake update` to refresh lockfile first).
 
+---
+
+## MANDATORY: Local Bevy Skills First (Strong Enforcement)
+
+**BEFORE ANY BEVY 0.17 RESEARCH OR IMPLEMENTATION:**
+
+You MUST check local skills FIRST. No exceptions. This is not negotiable.
+
+### Available Local Bevy Skills
+
+1. **`latest-rs-bevy-features`** (Production-ready, TDD-validated)
+   - Use for: Stability assessment, production readiness, deployment decisions, FPS impact
+   - Time: < 2 minutes per decision
+   - Trigger: Any question about Bevy 0.17+ features
+
+2. **`crates-rs-bevy`** (Comprehensive reference)
+   - Use for: Full API documentation, detailed method signatures
+   - Time: Reference material for deep dives
+   - Trigger: Specific API questions (e.g., "What methods does Camera have?")
+
+### The Rule (STRONG ENFORCEMENT)
+
+**If you're working on ANY of these, you MUST use local skills first:**
+- ✅ Headless widgets, ViewportNode, TilemapChunk
+- ✅ Event system (Trigger pattern, lifecycle events)
+- ✅ Component propagation, UI gradients, Val helpers
+- ✅ Breaking changes assessment (0.16 → 0.17)
+- ✅ Third-party crate compatibility (bevy_ecs_tilemap, bevy_egui, etc.)
+- ✅ Production readiness decisions
+- ✅ FPS impact estimates
+- ✅ WASM deployment constraints
+
+### DO NOT do this:
+- ❌ Search GitHub without checking skills first
+- ❌ Ask Discord/Reddit before reading skill
+- ❌ Assume feature stability without checking skill stability matrix
+- ❌ Pick third-party crates without verifying skill's version table
+- ❌ Estimate FPS impact without checking skill's performance reference
+
+### Workflow (Non-Negotiable)
+
+1. **Ask yourself:** "Is this about Bevy 0.17 features?"
+   - YES → Go to step 2
+   - NO → Proceed normally
+
+2. **Check local skills:**
+   ```bash
+   # latest-rs-bevy-features: decisions in < 2 minutes
+   # crates-rs-bevy: deep API reference
+   ```
+   - Found answer? → Use it immediately
+   - Still unclear? → Go to step 3
+
+3. **Only then, research network sources** (if needed)
+   - Official release notes (bevy.org/news)
+   - Bevy examples (github.com/bevyengine/bevy/examples)
+   - Migration guide (bevyengine.org/learn/migration-guides)
+   - API docs (docs.rs/bevy)
+
+### Why This Matters
+
+- **Speed:** 12-18x faster than scattered research
+- **Confidence:** 95%+ on deployment decisions vs. 50% baseline
+- **Correctness:** Skills are TDD-validated, not guesswork
+- **Consistency:** Every agent uses same authoritative reference
+
+---
+
+## AUTOMATED TESTING BEFORE MANUAL VERIFICATION
+
+**Before asking for manual testing, the LLM MUST verify:**
+
+1. **Run README checks** - Validate against README.md testing requirements
+2. **Run cargo test** - All tests pass, no regressions
+3. **Run cargo check** - No compilation errors
+4. **Run cargo build** - Builds successfully
+5. **Report results** - Document findings before handing to human
+
+### What Tests Verify (From README.md)
+
+See README.md "For LLM Tools" section for detailed test verification checklist. Key metrics:
+
+| Metric | Baseline | Threshold |
+|--------|----------|-----------|
+| 1000-frame simulation | ~19,000 fps | ≥15,000 fps |
+| Average frame time | ~52 µs | ≤67 µs |
+| Enemy movement | 1.0 units/frame | Exact |
+| Entity persistence | 100% | 100% |
+
+If ANY metric fails → LLM must investigate and report issues, not hand to human.
+
+### Testing Workflow (LLM)
+
+```bash
+# 1. Run comprehensive tests
+cargo test -- --nocapture
+
+# 2. Run performance baseline
+cargo test test_headless_app_creation -- --nocapture
+
+# 3. Verify against README thresholds
+# - Check: fps ≥ 15,000
+# - Check: frame time ≤ 67µs
+# - Check: enemy movement = 10.0 units
+# - Check: no entities lost
+
+# 4. Report findings
+# - If all pass: "Testing verified, manual testing OK"
+# - If any fail: "Regression detected at [metric], investigating..."
+```
+
+### Hand-off to Human
+
+Only after ALL of the above pass can you ask for manual testing. Your report should include:
+- ✅ All cargo test results (pass/fail)
+- ✅ Performance metrics vs. baselines
+- ✅ Any regressions detected
+- ✅ Recommendation: "Ready for manual testing" or "Issues to resolve"
+
 ## Notes
 
 - This codebase prioritizes clarity and iterability for agent learning over production optimization
@@ -140,3 +259,4 @@ Enter the environment with `nix develop` (or `nix flake update` to refresh lockf
 - Window is resizable; some UI elements may need responsive adjustments
 - Bevy version: 0.13.1 (check `Cargo.toml` for current dependencies)
 - The project uses `bevy::utils` instead of `std::time` for WASM compatibility (see commit 10cce3d)
+- Do both, always remove worktree and branch once merged to dev and tests ok

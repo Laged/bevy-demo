@@ -34,8 +34,25 @@ cargo run
 - `docs/tech/rs/` – Bevy/Rust implementation notes that mirror the game docs chapter-for-chapter.
 - `docs-shooter/game/` – detailed documentation of the shooter as it exists today.
 - `docs-shooter/tech/rs/` – system-level breakdown of the live codebase (plugins, components, assets, known issues).
+- `docs/bevy-features-0.17.md` – Comprehensive Bevy 0.17 features reference with integration patterns.
+- `docs/SKILLS_AND_FEATURES.md` – Guide to using local Bevy skills for fast, confident decisions.
 
 Start with `docs-shooter/game/00_INDEX.md` to understand the shipped experience, then dive into the corresponding tech documents before touching code.
+
+### ⚡ Bevy 0.17 Local Skills (MANDATORY FOR LLM AGENTS)
+
+**Two powerful local skills are available for ALL Bevy feature work:**
+
+1. **`latest-rs-bevy-features`** - Production-ready, TDD-validated skill
+   - **Use for:** Stability checks, production readiness, deployment decisions, FPS impact
+   - **Time:** < 2 minutes per decision
+   - **Example:** "Is headless widgets production-ready?" → Skill says ❌ experimental + alternatives
+
+2. **`crates-rs-bevy`** - Comprehensive API reference
+   - **Use for:** Full API docs, method signatures, deep dives
+   - **Example:** "What methods does Camera have?" → Full API reference
+
+**STRONG ENFORCEMENT:** Before ANY Bevy 0.17 research or implementation, you MUST check these skills first. No exceptions. See CLAUDE.md "MANDATORY: Local Bevy Skills First" for the complete workflow.
 
 ## Full Installation Guide
 
@@ -133,30 +150,39 @@ cargo test test_headless_app_creation -- --nocapture
 
 ### For LLM Tools: Using Tests to Monitor Changes
 
-When modifying game logic, **always run the headless test** to verify:
+When modifying game logic, **ALWAYS run the complete test suite before asking for manual testing**:
 
 ```bash
+# 1. Run all tests
+cargo test -- --nocapture
+
+# 2. Specifically run headless performance baseline
 cargo test test_headless_app_creation -- --nocapture
+
+# 3. Verify build compiles
+cargo check && cargo build
 ```
 
 **What to check in the output:**
 
-1. **Performance Metrics**:
+1. **Performance Metrics** (MUST verify against baselines):
    ```
-   1000 frames completed in ~50ms (≥15,000 fps required)
-   Average frame time: ≤67µs
+   1000 frames completed in ~50ms (≥15,000 fps required) ✓
+   Average frame time: ≤67µs ✓
    ```
-   If fps drops below 15,000 or frame time exceeds 67µs → **performance regression detected**
+   - If fps drops below 15,000 → **performance regression detected, must fix**
+   - If frame time exceeds 67µs → **performance regression detected, must fix**
+   - Report actual numbers in your summary before hand-off
 
-2. **Behavior Validation**:
+2. **Behavior Validation** (MUST verify logic intact):
    ```
-   Enemy moved 10.00 units closer to player
-   Player position unchanged: true
+   Enemy moved 10.00 units closer to player ✓
+   Player position unchanged: true ✓
    ```
-   If enemy doesn't move exactly 10 units → **AI logic broken**
-   If player moves without input → **headless mode broken**
+   - If enemy doesn't move exactly 10 units → **AI logic broken, must fix**
+   - If player moves without input → **headless mode broken, must fix**
 
-3. **System Health Checklist**:
+3. **System Health Checklist** (MUST verify all pass):
    ```
    ✓ State machine transitions work
    ✓ Entities spawn and persist
@@ -164,7 +190,7 @@ cargo test test_headless_app_creation -- --nocapture
    ✓ Player stationary without input
    ✓ Health systems operational
    ```
-   Any ✗ indicates a broken subsystem → **investigate immediately**
+   - Any ✗ indicates a broken subsystem → **investigate and fix immediately**
 
 **Example: Detecting a Performance Regression**
 ```diff
@@ -174,7 +200,7 @@ cargo test test_headless_app_creation -- --nocapture
 # After your change:
 1000 frames completed in 150ms (6,666 fps) ✗
 ```
-**Action**: Your change introduced a 3x slowdown. Revert or optimize.
+**LLM Action**: Your change introduced a 3x slowdown. MUST revert or optimize before asking for manual testing.
 
 **Example: Detecting Broken Logic**
 ```diff
@@ -184,7 +210,46 @@ Enemy moved 10.00 units closer to player ✓
 # After your change:
 Enemy moved 0.00 units closer to player ✗
 ```
-**Action**: Enemy movement system is broken. Check `src/enemy.rs:update_enemy_transform`
+**LLM Action**: Enemy movement system is broken. MUST investigate `src/enemy.rs:update_enemy_transform` and fix before hand-off.
+
+**MANDATORY: Hand-off Report Template**
+
+After running all tests, provide a summary like this before asking for manual testing:
+
+```
+✅ ALL AUTOMATED TESTS PASSED
+
+Performance Metrics:
+- 1000-frame simulation: 19,200 fps (baseline: ≥15,000) ✓
+- Average frame time: 52µs (baseline: ≤67µs) ✓
+- No performance regression detected ✓
+
+Behavior Validation:
+- Enemy movement: 10.00 units/frame ✓
+- Player stationary without input ✓
+- State machine working ✓
+
+Test Results:
+- cargo test: All passed ✓
+- cargo check: No errors ✓
+- cargo build: Success ✓
+
+Recommendation: Ready for manual testing
+```
+
+OR if tests fail:
+
+```
+❌ TEST FAILURE DETECTED
+
+Issue: Performance regression
+- 1000-frame simulation: 12,500 fps (baseline: ≥15,000) ✗
+- Introduced by: [describe your change]
+
+Action: Investigating [relevant system] to resolve before hand-off
+```
+
+**NEVER ask for manual testing if any test fails. Always report, investigate, and fix first.**
 
 ### Development Workflow
 
