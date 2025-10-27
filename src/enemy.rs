@@ -146,8 +146,9 @@ fn despawn_dead_enemies_visual(
                 },
             ));
 
-            // Despawn sprite children (but not the entity itself - logic system does that)
-            commands.entity(entity).despawn_children();
+            // Mark for despawn - the logic system will handle the actual despawn
+            // This avoids double-despawn issues with children
+            // We only spawn the particle effects here, let the logic system handle removal
         }
     }
 }
@@ -216,6 +217,8 @@ fn spawn_enemies(
             EnemyColor(random_color),
             AnimationTimer(Timer::from_seconds(0.08, TimerMode::Repeating)),
             GameEntity,
+            Visibility::default(),
+            InheritedVisibility::default(),
         ))
         .with_children(|parent| {
             // Base sprite (black/white details, no tint)
@@ -229,6 +232,8 @@ fn spawn_enemies(
                     ..default()
                 },
                 Transform::default(),
+                InheritedVisibility::default(),
+                Visibility::default(),
                 EnemyBaseSprite,
             ));
 
@@ -244,6 +249,8 @@ fn spawn_enemies(
                     ..default()
                 },
                 Transform::from_translation(vec3(0.0, 0.0, 0.1)), // Slightly in front
+                InheritedVisibility::default(),
+                Visibility::default(),
                 EnemyTintSprite,
             ));
         });
