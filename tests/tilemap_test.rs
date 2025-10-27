@@ -9,6 +9,7 @@ use bevy::prelude::*;
 use hell_game::domains::graphics::tilemap::{ArenaZone, TilemapConfig, TilemapPlugin, TilemapTile};
 use hell_game::domains::testing::harness::create_headless_app;
 use hell_game::domains::testing::simulation::{run_frames, set_state};
+use hell_game::entities::world::GameEntity;
 use hell_game::plugin_mode::PluginMode;
 use hell_game::state::GameState;
 
@@ -125,7 +126,7 @@ fn test_tilemap_cleanup_on_state_exit() {
     // Verify all tiles have GameEntity component (enables WorldPlugin cleanup)
     let tiles_with_game_entity = app
         .world_mut()
-        .query::<(&TilemapTile, &hell_game::entities::world::GameEntity)>()
+        .query::<(&TilemapTile, &GameEntity)>()
         .iter(app.world())
         .count();
 
