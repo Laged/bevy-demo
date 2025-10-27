@@ -1,6 +1,17 @@
 // Core infrastructure
 pub mod core;
 
+// Domain modules
+pub mod domains {
+    pub mod ui;
+    pub mod gameplay;
+    pub mod graphics;
+    pub mod testing;
+}
+
+// Entity definitions
+pub mod entities;
+
 pub mod animation;
 pub mod benchmark_config;
 pub mod camera;
