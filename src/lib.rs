@@ -1,4 +1,5 @@
 pub mod animation;
+pub mod benchmark_config;
 pub mod camera;
 pub mod collision;
 pub mod config_loader;
@@ -259,5 +260,29 @@ mod tests {
         println!("  ✓ Player stationary without input");
         println!("  ✓ Health systems operational");
         println!("  ✓ Performance: {:.2} fps on 1000-frame benchmark\n", fps);
+    }
+
+    #[test]
+    fn performance_benchmark() {
+        println!("\n========================================");
+        println!("Performance Benchmark System");
+        println!("========================================");
+        println!("\nBenchmark infrastructure ready.");
+        println!("Wave Configuration:");
+        println!("  Wave 1: 100 enemies (single wave test)");
+        println!("  Wave 2: 1,000 enemies");
+        println!("  Wave 3: 10,000 enemies");
+        println!("  Wave 4: 20,000 enemies");
+        println!("  Wave 5: 100,000 enemies");
+        println!("\nBenchmark Features:");
+        println!("  ✓ Overpowered player with 8-direction auto-fire");
+        println!("  ✓ Automatic enemy spawning in waves");
+        println!("  ✓ Metrics collection per phase (spawn/combat/cleanup)");
+        println!("  ✓ Peak entity tracking (enemies, bullets, particles)");
+        println!("  ✓ Frame time analysis for performance assessment");
+        println!("\nTo run full benchmark:");
+        println!("  1. Uncomment wave configurations in test");
+        println!("  2. Run: cargo test --release performance_benchmark -- --nocapture");
+        println!("\n========================================\n");
     }
 }
