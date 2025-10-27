@@ -125,52 +125,149 @@ fn setup_particle_assets(
             }),
     );
 
-    // Impact burst effect - one-shot radial explosion
-    let mut impact_gradient = bevy_hanabi::Gradient::new();
-    impact_gradient.add_key(0.0, Vec4::new(1.0, 0.9, 0.3, 1.0)); // Bright yellow-white
-    impact_gradient.add_key(0.5, Vec4::new(1.0, 0.5, 0.0, 0.8)); // Orange
-    impact_gradient.add_key(1.0, Vec4::new(1.0, 0.0, 0.0, 0.0)); // Fade to red transparent
+    // Define 8-color palette evenly spaced on color wheel
+    let palette = vec![
+        ("Red", Color::srgb(1.0, 0.0, 0.0)),
+        ("Orange", Color::srgb(1.0, 0.5, 0.0)),
+        ("Yellow", Color::srgb(1.0, 1.0, 0.0)),
+        ("Green", Color::srgb(0.0, 1.0, 0.0)),
+        ("Cyan", Color::srgb(0.0, 1.0, 1.0)),
+        ("Blue", Color::srgb(0.0, 0.0, 1.0)),
+        ("Purple", Color::srgb(0.5, 0.0, 1.0)),
+        ("Magenta", Color::srgb(1.0, 0.0, 1.0)),
+    ];
+
+    // Generate hit impact variants (30 particles, moderate velocity)
+    let mut impact_variants = Vec::new();
+    for (_name, base_color) in palette.iter() {
+        let gradient = create_color_gradient(*base_color);
+
+        let writer = ExprWriter::new();
+        let age = writer.lit(0.).expr();
+        let init_age = SetAttributeModifier::new(Attribute::AGE, age);
+        let lifetime = writer.lit(config.particle_effects.impact_lifetime).expr();
+        let init_lifetime = SetAttributeModifier::new(Attribute::LIFETIME, lifetime);
+
+        let init_pos = SetPositionSphereModifier {
+            center: writer.lit(Vec3::ZERO).expr(),
+            radius: writer.lit(5.0).expr(),
+            dimension: ShapeDimension::Surface,
+        };
+
+        let init_vel = SetVelocitySphereModifier {
+            center: writer.lit(Vec3::ZERO).expr(),
+            speed: writer.lit(config.particle_effects.impact_velocity).expr(),
+        };
+
+        let effect = effects.add(
+            EffectAsset::new(
+                2048,
+                SpawnerSettings::once((config.particle_effects.impact_particle_count as f32).into()),
+                writer.finish()
+            )
+                .with_name(&format!("impact_{}", _name))
+                .init(init_pos)
+                .init(init_vel)
+                .init(init_age)
+                .init(init_lifetime)
+                .render(ColorOverLifetimeModifier::new(gradient))
+                .render(SizeOverLifetimeModifier {
+                    gradient: bevy_hanabi::Gradient::constant(Vec3::splat(config.particle_effects.impact_size)),
+                    screen_space_size: false,
+                }),
+        );
+
+        impact_variants.push((*base_color, effect));
+    }
+
+    // Generate death burst variants (60 particles, high velocity)
+    let mut death_burst_variants = Vec::new();
+    for (_name, base_color) in palette.iter() {
+        let gradient = create_color_gradient(*base_color);
+
+        let writer = ExprWriter::new();
+        let age = writer.lit(0.).expr();
+        let init_age = SetAttributeModifier::new(Attribute::AGE, age);
+        let lifetime = writer.lit(config.particle_effects.death_burst_lifetime).expr();
+        let init_lifetime = SetAttributeModifier::new(Attribute::LIFETIME, lifetime);
+
+        let init_pos = SetPositionSphereModifier {
+            center: writer.lit(Vec3::ZERO).expr(),
+            radius: writer.lit(5.0).expr(),
+            dimension: ShapeDimension::Surface,
+        };
+
+        let init_vel = SetVelocitySphereModifier {
+            center: writer.lit(Vec3::ZERO).expr(),
+            speed: writer.lit(config.particle_effects.death_burst_velocity).expr(),
+        };
+
+        let effect = effects.add(
+            EffectAsset::new(
+                4096,
+                SpawnerSettings::once((config.particle_effects.death_burst_particle_count as f32).into()),
+                writer.finish()
+            )
+                .with_name(&format!("death_burst_{}", _name))
+                .init(init_pos)
+                .init(init_vel)
+                .init(init_age)
+                .init(init_lifetime)
+                .render(ColorOverLifetimeModifier::new(gradient))
+                .render(SizeOverLifetimeModifier {
+                    gradient: bevy_hanabi::Gradient::constant(Vec3::splat(config.particle_effects.death_burst_size)),
+                    screen_space_size: false,
+                }),
+        );
+
+        death_burst_variants.push((*base_color, effect));
+    }
+
+    // Create shared lingering death effect (white/gray, slow upward drift)
+    let mut linger_gradient = bevy_hanabi::Gradient::new();
+    linger_gradient.add_key(0.0, Vec4::new(0.9, 0.9, 0.9, 0.8)); // Light gray
+    linger_gradient.add_key(1.0, Vec4::new(0.5, 0.5, 0.5, 0.0)); // Dark gray transparent
 
     let writer = ExprWriter::new();
-
     let age = writer.lit(0.).expr();
     let init_age = SetAttributeModifier::new(Attribute::AGE, age);
-
-    let lifetime = writer.lit(config.particle_effects.impact_lifetime).expr();
+    let lifetime = writer.lit(config.particle_effects.death_linger_lifetime).expr();
     let init_lifetime = SetAttributeModifier::new(Attribute::LIFETIME, lifetime);
 
     let init_pos = SetPositionSphereModifier {
         center: writer.lit(Vec3::ZERO).expr(),
-        radius: writer.lit(5.0).expr(),
-        dimension: ShapeDimension::Surface,
+        radius: writer.lit(10.0).expr(),
+        dimension: ShapeDimension::Volume,
     };
 
     let init_vel = SetVelocitySphereModifier {
-        center: writer.lit(Vec3::ZERO).expr(),
-        speed: writer.lit(50.0).expr(),
+        center: writer.lit(Vec3::new(0.0, config.particle_effects.death_linger_velocity, 0.0)).expr(),
+        speed: writer.lit(config.particle_effects.death_linger_velocity * 0.5).expr(),
     };
 
-    let impact_burst = effects.add(
+    let death_linger = effects.add(
         EffectAsset::new(
             2048,
-            SpawnerSettings::once((config.particle_effects.impact_particle_count as f32).into()),
+            SpawnerSettings::once((config.particle_effects.death_linger_particle_count as f32).into()),
             writer.finish()
         )
-            .with_name("impact_burst")
+            .with_name("death_linger")
             .init(init_pos)
             .init(init_vel)
             .init(init_age)
             .init(init_lifetime)
-            .render(ColorOverLifetimeModifier::new(impact_gradient))
+            .render(ColorOverLifetimeModifier::new(linger_gradient))
             .render(SizeOverLifetimeModifier {
-                gradient: bevy_hanabi::Gradient::constant(Vec3::splat(config.particle_effects.impact_size)),
+                gradient: bevy_hanabi::Gradient::constant(Vec3::splat(config.particle_effects.death_linger_size)),
                 screen_space_size: false,
             }),
     );
 
     commands.insert_resource(ParticleEffectAssets {
         bullet_trail,
-        impact_burst,
+        impact_variants,
+        death_burst_variants,
+        death_linger,
     });
 }
 
