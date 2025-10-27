@@ -41,6 +41,11 @@ pub mod animation {
     pub use crate::domains::graphics::animation::*;
 }
 
+// Backward compatibility - re-export tilemap
+pub mod tilemap {
+    pub use crate::domains::graphics::tilemap::*;
+}
+
 // Backward compatibility - re-export gui
 pub mod gui {
     pub use crate::domains::ui::hud::*;

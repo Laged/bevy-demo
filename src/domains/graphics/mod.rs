@@ -1,9 +1,10 @@
 //! Graphics Domain - Owned by Graphics Agent
 //!
-//! Particles, animations, sprites
+//! Particles, animations, sprites, tilemap backgrounds
 
 pub mod particles;
 pub mod animation;
+pub mod tilemap;
 
 use bevy::prelude::*;
 
