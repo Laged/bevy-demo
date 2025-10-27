@@ -5,14 +5,17 @@ use bevy::prelude::*;
 /// Runs the app for the specified number of frames.
 ///
 /// Each frame executes one full ECS update cycle.
+/// This is useful for simulating gameplay without rendering.
 ///
 /// # Example
 /// ```ignore
+/// use hell_game::test_utils::simulation::run_frames;
 /// run_frames(&mut app, 60); // Simulate 60 frames (~1 second at 60 FPS)
 /// ```
 pub fn run_frames(app: &mut App, num_frames: usize) {
-    // TODO: Implement in task 9
-    todo!("Will be implemented in task 9")
+    for _ in 0..num_frames {
+        app.update();
+    }
 }
 
 /// Transitions the app to the specified game state and runs one frame.
