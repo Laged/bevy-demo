@@ -3,6 +3,7 @@
 //! Renders a zoomed-out camera view into a UI corner for tactical overview
 
 use bevy::prelude::*;
+use bevy::ui::widget::ViewportNode;
 use crate::core::state::GameState;
 use crate::core::events::MinimapCameraReady;
 use crate::entities::player::Player;
@@ -91,7 +92,7 @@ fn setup_minimap_ui(
         BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.5)),
         MinimapUI,
         // ViewportNode connects this UI node to the camera
-        bevy::ui::ViewportNode::new(camera_entity),
+        ViewportNode::new(camera_entity),
     ));
 }
 
