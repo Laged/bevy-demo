@@ -1,3 +1,10 @@
+//! HUD and menu system - Owned by UI Agent
+//!
+//! Manages all UI elements:
+//! - Main menu
+//! - Debug overlay (FPS, entity counts)
+//! - Health display
+
 use bevy::diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin};
 use bevy::prelude::*;
 

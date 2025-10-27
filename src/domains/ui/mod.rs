@@ -2,6 +2,8 @@
 //!
 //! HUD, menus, choice UI, camera
 
+pub mod hud;
+
 use bevy::prelude::*;
 
 pub struct UiPlugin;

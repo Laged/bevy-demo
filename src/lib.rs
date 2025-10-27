@@ -17,7 +17,6 @@ pub mod collision;
 pub mod config_loader;
 pub mod configs;
 pub mod enemy;
-pub mod gui;
 pub mod gun;
 pub mod player;
 pub mod plugin_mode;
@@ -48,6 +47,11 @@ pub mod particle_effects {
 // Backward compatibility - re-export animation
 pub mod animation {
     pub use crate::domains::graphics::animation::*;
+}
+
+// Backward compatibility - re-export gui
+pub mod gui {
+    pub use crate::domains::ui::hud::*;
 }
 
 #[cfg(test)]
