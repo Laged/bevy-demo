@@ -231,5 +231,49 @@ fn calculate_avg_fps(frame_times_ms: &[f32]) -> f32 {
 
 #[test]
 fn performance_benchmark() {
-    println!("Benchmark test placeholder");
+    println!("\n========================================");
+    println!("Performance Benchmark Starting");
+    println!("========================================\n");
+
+    // Create headless app using test_utils (one line!)
+    let config = GameConfig::benchmark_mode();
+    let mut app = create_headless_app(config.clone());
+
+    // Initialize to InGame state (one line!)
+    init_for_testing(&mut app, &config);
+
+    // Add benchmark-specific systems
+    app.insert_resource(BenchmarkState::new());
+    app.add_systems(
+        Update,
+        (
+            benchmark_wave_controller,
+            benchmark_auto_fire_8_directions,
+            benchmark_metrics_collector,
+        ),
+    );
+
+    // Run until complete
+    let max_frames = 10000;
+    let mut frame_count = 0;
+
+    while frame_count < max_frames {
+        app.update();
+        frame_count += 1;
+
+        if app.world().resource::<BenchmarkState>().phase == BenchmarkPhase::Complete {
+            break;
+        }
+    }
+
+    println!("\n========================================");
+    println!("Benchmark Complete!");
+    println!("Total frames: {}", frame_count);
+    println!("========================================\n");
+
+    assert_eq!(
+        app.world().resource::<BenchmarkState>().phase,
+        BenchmarkPhase::Complete,
+        "Benchmark should complete all waves"
+    );
 }
