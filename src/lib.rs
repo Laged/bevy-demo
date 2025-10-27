@@ -12,7 +12,6 @@ pub mod domains {
 // Entity definitions
 pub mod entities;
 
-pub mod camera;
 pub mod collision;
 pub mod config_loader;
 pub mod configs;
@@ -52,6 +51,11 @@ pub mod animation {
 // Backward compatibility - re-export gui
 pub mod gui {
     pub use crate::domains::ui::hud::*;
+}
+
+// Backward compatibility - re-export camera
+pub mod camera {
+    pub use crate::domains::ui::camera::*;
 }
 
 #[cfg(test)]

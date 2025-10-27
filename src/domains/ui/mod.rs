@@ -3,6 +3,7 @@
 //! HUD, menus, choice UI, camera
 
 pub mod hud;
+pub mod camera;
 
 use bevy::prelude::*;
 

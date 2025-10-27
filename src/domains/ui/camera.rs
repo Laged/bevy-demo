@@ -1,3 +1,9 @@
+//! Camera system - Owned by UI Agent
+//!
+//! Manages camera behavior:
+//! - Following player
+//! - Pan controls via bevy_pancam
+
 use bevy::{math::vec3, prelude::*};
 use bevy_pancam::{PanCam, PanCamPlugin};
 
