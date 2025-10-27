@@ -261,4 +261,227 @@ mod tests {
         println!("  ✓ Health systems operational");
         println!("  ✓ Performance: {:.2} fps on 1000-frame benchmark\n", fps);
     }
+
+    #[test]
+    fn performance_benchmark() {
+        use crate::test_utils::*;
+        use std::time::Instant;
+        use bevy_hanabi::prelude::*;
+        use rand::Rng;
+
+        #[derive(Resource)]
+        struct BenchmarkState {
+            current_wave: usize,
+            wave_timer: Timer,
+            phase: BenchmarkPhase,
+            metrics: WaveMetrics,
+        }
+
+        #[derive(PartialEq, Clone, Copy, Debug)]
+        enum BenchmarkPhase {
+            Spawn,
+            Combat,
+            Cleanup,
+            Complete,
+        }
+
+        struct WaveConfig {
+            enemy_count: u32,
+        }
+
+        const BENCHMARK_WAVES: &[WaveConfig] = &[
+            WaveConfig { enemy_count: 100 },
+            // Temporarily testing single wave - will uncomment for full run
+            // WaveConfig { enemy_count: 1_000 },
+            // WaveConfig { enemy_count: 10_000 },
+            // WaveConfig { enemy_count: 20_000 },
+            // WaveConfig { enemy_count: 100_000 },
+        ];
+
+        #[derive(Default)]
+        struct WaveMetrics {
+            wave_number: usize,
+            enemy_count: u32,
+            spawn_frame_times: Vec<f32>,
+            combat_frame_times: Vec<f32>,
+            cleanup_frame_times: Vec<f32>,
+            peak_particle_count: u32,
+            peak_bullet_count: u32,
+            peak_enemy_count: u32,
+        }
+
+        impl WaveMetrics {
+            fn new(wave_number: usize, enemy_count: u32) -> Self {
+                Self {
+                    wave_number,
+                    enemy_count,
+                    ..Default::default()
+                }
+            }
+        }
+
+        impl BenchmarkState {
+            fn new() -> Self {
+                Self {
+                    current_wave: 0,
+                    wave_timer: Timer::from_seconds(5.0, TimerMode::Once),
+                    phase: BenchmarkPhase::Spawn,
+                    metrics: WaveMetrics::new(0, 100),
+                }
+            }
+        }
+
+        fn benchmark_wave_controller(
+            mut state: ResMut<BenchmarkState>,
+            time: Res<Time>,
+            mut commands: Commands,
+            config: Res<GameConfig>,
+        ) {
+            state.wave_timer.tick(time.delta());
+            let elapsed = state.wave_timer.elapsed_secs();
+
+            match state.phase {
+                BenchmarkPhase::Spawn if elapsed < 0.5 => {
+                    spawn_test_enemies(&mut commands, BENCHMARK_WAVES[state.current_wave].enemy_count, 500.0, &config);
+                    state.phase = BenchmarkPhase::Combat;
+                }
+                BenchmarkPhase::Combat if elapsed >= 0.5 && elapsed < 4.5 => {}
+                BenchmarkPhase::Cleanup if elapsed >= 4.5 && elapsed < 5.0 => {}
+                _ if elapsed >= 5.0 => {
+                    println!("\nWave {}/{} complete!", state.current_wave + 1, BENCHMARK_WAVES.len());
+                    state.current_wave += 1;
+
+                    if state.current_wave >= BENCHMARK_WAVES.len() {
+                        state.phase = BenchmarkPhase::Complete;
+                    } else {
+                        state.wave_timer.reset();
+                        state.phase = BenchmarkPhase::Spawn;
+                        state.metrics = WaveMetrics::new(state.current_wave, BENCHMARK_WAVES[state.current_wave].enemy_count);
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        fn benchmark_auto_fire_8_directions(
+            state: Res<BenchmarkState>,
+            player_query: Query<&Transform, With<crate::player::Player>>,
+            mut commands: Commands,
+            _handle: Res<GlobalTextureAtlas>,
+            config: Res<GameConfig>,
+        ) {
+            if state.phase != BenchmarkPhase::Combat {
+                return;
+            }
+
+            let Ok(player_transform) = player_query.get_single() else { return };
+            let player_pos = player_transform.translation;
+
+            let directions = [
+                Vec3::Y,
+                (Vec3::X + Vec3::Y).normalize(),
+                Vec3::X,
+                (Vec3::X - Vec3::Y).normalize(),
+                -Vec3::Y,
+                (-Vec3::X - Vec3::Y).normalize(),
+                -Vec3::X,
+                (-Vec3::X + Vec3::Y).normalize(),
+            ];
+
+            use bevy::math::vec3;
+
+            for direction in directions {
+                for _ in 0..config.gun.num_bullets_per_shot {
+                    let mut rng = rand::thread_rng();
+                    let spread_dir = vec3(
+                        direction.x + rng.gen_range(-0.1..0.1),
+                        direction.y + rng.gen_range(-0.1..0.1),
+                        direction.z,
+                    );
+
+                    commands.spawn((
+                        Transform::from_translation(player_pos),
+                        crate::gun::Bullet,
+                        crate::gun::BulletDirection(spread_dir),
+                        crate::gun::SpawnInstant(Instant::now()),
+                    ));
+                }
+            }
+        }
+
+        fn benchmark_metrics_collector(
+            mut state: ResMut<BenchmarkState>,
+            time: Res<Time>,
+            bullets: Query<(), With<crate::gun::Bullet>>,
+            particles: Query<(), Or<(
+                With<crate::particle_effects::ImpactEffect>,
+                With<crate::particle_effects::DeathLingerEffect>,
+            )>>,
+            enemies: Query<(), With<crate::enemy::Enemy>>,
+        ) {
+            let frame_time_ms = time.delta_secs() * 1000.0;
+
+            match state.phase {
+                BenchmarkPhase::Spawn => {
+                    state.metrics.spawn_frame_times.push(frame_time_ms);
+                }
+                BenchmarkPhase::Combat => {
+                    state.metrics.combat_frame_times.push(frame_time_ms);
+                }
+                BenchmarkPhase::Cleanup => {
+                    state.metrics.cleanup_frame_times.push(frame_time_ms);
+                }
+                _ => {}
+            }
+
+            let particle_count = particles.iter().count() as u32;
+            let bullet_count = bullets.iter().count() as u32;
+            let enemy_count = enemies.iter().count() as u32;
+
+            state.metrics.peak_particle_count = state.metrics.peak_particle_count.max(particle_count);
+            state.metrics.peak_bullet_count = state.metrics.peak_bullet_count.max(bullet_count);
+            state.metrics.peak_enemy_count = state.metrics.peak_enemy_count.max(enemy_count);
+        }
+
+        println!("\n========================================");
+        println!("Performance Benchmark Starting");
+        println!("========================================\n");
+
+        let config = GameConfig::benchmark_mode();
+        let mut app = app::create_headless_app(config.clone());
+        init_for_testing(&mut app, &config);
+
+        app.insert_resource(BenchmarkState::new());
+        app.add_systems(
+            Update,
+            (
+                benchmark_wave_controller,
+                benchmark_auto_fire_8_directions,
+                benchmark_metrics_collector,
+            ),
+        );
+
+        let max_frames = 10000;
+        let mut frame_count = 0;
+
+        while frame_count < max_frames {
+            app.update();
+            frame_count += 1;
+
+            if app.world().resource::<BenchmarkState>().phase == BenchmarkPhase::Complete {
+                break;
+            }
+        }
+
+        println!("\n========================================");
+        println!("Benchmark Complete!");
+        println!("Total frames: {}", frame_count);
+        println!("========================================\n");
+
+        assert_eq!(
+            app.world().resource::<BenchmarkState>().phase,
+            BenchmarkPhase::Complete,
+            "Benchmark should complete all waves"
+        );
+    }
 }
