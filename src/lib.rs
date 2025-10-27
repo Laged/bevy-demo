@@ -8,6 +8,7 @@ pub mod gui;
 pub mod gun;
 pub mod particle_effects;
 pub mod player;
+pub mod plugin_mode;
 pub mod resources;
 pub mod state;
 pub mod world;
