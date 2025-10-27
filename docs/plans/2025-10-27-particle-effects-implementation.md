@@ -1,5 +1,7 @@
 # Particle Effects Implementation Plan
 
+> **STATUS: ✅ COMPLETED - Merged to dev branch**
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Add GPU-accelerated bullet trails and impact particle effects using bevy_hanabi while keeping sprite-based collision detection.

@@ -1,5 +1,7 @@
 # Per-Enemy Colored Particle Effects Implementation Plan
 
+> **STATUS: ✅ COMPLETED - Merged to dev branch**
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Add color-matched particle effects for enemy hit impacts and death explosions using an 8-color effect asset pool.
