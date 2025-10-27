@@ -26,3 +26,9 @@ pub struct ChoiceSelectedEvent {
 /// Hide the choice UI
 #[derive(Event)]
 pub struct HideChoiceUIEvent;
+
+/// Minimap camera is ready and positioned
+#[derive(Event, Clone)]
+pub struct MinimapCameraReady {
+    pub camera_entity: Entity,
+}

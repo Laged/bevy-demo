@@ -4,6 +4,7 @@
 
 pub mod hud;
 pub mod camera;
+pub mod minimap;
 
 use bevy::prelude::*;
 
