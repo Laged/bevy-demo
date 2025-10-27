@@ -10,9 +10,20 @@ use hell_game::core::{GameState, CollisionPlugin, ResourcesPlugin};
 use hell_game::entities::{PlayerPlugin, EnemyPlugin, WorldPlugin};
 
 // Domain plugins
-use hell_game::domains::ui::{hud::GuiPlugin, camera::FollowCameraPlugin};
+use hell_game::domains::ui::{
+    hud::GuiPlugin,
+    camera::FollowCameraPlugin,
+    minimap::MinimapPlugin,
+    pause_menu::PauseMenuPlugin,
+    settings_panel::SettingsPanelPlugin,
+};
 use hell_game::domains::gameplay::combat::GunPlugin;
-use hell_game::domains::graphics::{animation::AnimationPlugin, particles::ParticleEffectsPlugin};
+use hell_game::domains::graphics::{
+    animation::AnimationPlugin,
+    particles::ParticleEffectsPlugin,
+    tilemap::TilemapPlugin,
+};
+use hell_game::plugin_mode::PluginMode;
 
 // Re-export config for convenience
 use hell_game::GameConfig;
@@ -47,15 +58,24 @@ fn main() {
             config.colors.bg_color[2],
         )))
         .insert_resource(config)
+        // Core systems
+        .add_plugins(ResourcesPlugin)
+        .add_plugins(CollisionPlugin)
+        // Entities
+        .add_plugins(PlayerPlugin::default())
+        .add_plugins(EnemyPlugin::default())
+        .add_plugins(WorldPlugin)
+        // Graphics
+        .add_plugins(AnimationPlugin)
+        .add_plugins(ParticleEffectsPlugin)
+        .add_plugins(TilemapPlugin::new(PluginMode::Standard))  // Bevy 0.17: Colored arena zones
+        // Gameplay
+        .add_plugins(GunPlugin::default())
+        // UI
         .add_plugins(FollowCameraPlugin)
         .add_plugins(GuiPlugin)
-        .add_plugins(GunPlugin::default())
-        .add_plugins(PlayerPlugin::default())
-        .add_plugins(AnimationPlugin)
-        .add_plugins(ResourcesPlugin)
-        .add_plugins(WorldPlugin)
-        .add_plugins(EnemyPlugin::default())
-        .add_plugins(CollisionPlugin)
-        .add_plugins(ParticleEffectsPlugin)
+        .add_plugins(MinimapPlugin::new(PluginMode::Standard))  // Bevy 0.17: ViewportNode minimap
+        .add_plugins(PauseMenuPlugin::new(PluginMode::Standard))  // Bevy 0.17: Pause menu
+        .add_plugins(SettingsPanelPlugin::new(PluginMode::Standard))  // Bevy 0.17: Settings panel
         .run();
 }
