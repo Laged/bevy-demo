@@ -18,6 +18,9 @@ pub use configs::*;
 pub use resources::*;
 
 #[cfg(test)]
+pub mod test_utils;
+
+#[cfg(test)]
 mod tests {
     use crate::state::GameState;
 
