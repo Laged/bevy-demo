@@ -12,8 +12,23 @@ use crate::world::GameEntity;
 use crate::particle_effects::{ParticleEffectAssets, DeathLingerEffect, ImpactEffect, find_closest_effect_variant};
 use bevy_hanabi::prelude::*;
 use crate::*;
+use crate::plugin_mode::PluginMode;
 
-pub struct EnemyPlugin;
+pub struct EnemyPlugin {
+    mode: PluginMode,
+}
+
+impl EnemyPlugin {
+    pub fn new(mode: PluginMode) -> Self {
+        Self { mode }
+    }
+}
+
+impl Default for EnemyPlugin {
+    fn default() -> Self {
+        Self::new(PluginMode::default())
+    }
+}
 
 #[derive(Component)]
 pub struct Enemy {
@@ -45,20 +60,50 @@ impl Plugin for EnemyPlugin {
             .expect("GameConfig must be inserted before EnemyPlugin");
         let spawn_interval = config.enemy.spawn_interval;
 
+        // Logic systems (always run in both modes)
         app.add_systems(
             Update,
             (
-                spawn_enemies.run_if(on_timer(Duration::from_secs_f32(spawn_interval))),
                 update_enemy_transform,
-                despawn_dead_enemies,
-                sync_enemy_colors,
+                despawn_dead_enemies_logic,
             )
                 .run_if(in_state(GameState::InGame)),
         );
+
+        // Rendering systems (only run in Standard mode)
+        if self.mode == PluginMode::Standard {
+            app.add_systems(
+                Update,
+                (
+                    spawn_enemies.run_if(on_timer(Duration::from_secs_f32(spawn_interval))),
+                    sync_enemy_colors,
+                    despawn_dead_enemies_visual,
+                )
+                    .run_if(in_state(GameState::InGame)),
+            );
+        }
     }
 }
 
-fn despawn_dead_enemies(
+/// Logic-only despawn system - removes dead enemies without visual effects
+fn despawn_dead_enemies_logic(
+    mut commands: Commands,
+    enemy_query: Query<(&Enemy, Entity), With<Enemy>>,
+) {
+    if enemy_query.is_empty() {
+        return;
+    }
+
+    for (enemy, entity) in enemy_query.iter() {
+        if enemy.health <= 0.0 {
+            commands.entity(entity).despawn();
+        }
+    }
+}
+
+/// Visual-only despawn system - spawns particle effects for dead enemies
+/// Runs BEFORE despawn_dead_enemies_logic to spawn effects before entity is removed
+fn despawn_dead_enemies_visual(
     mut commands: Commands,
     enemy_query: Query<(&Enemy, &EnemyColor, &Transform, Entity), With<Enemy>>,
     particle_assets: Res<ParticleEffectAssets>,
@@ -101,10 +146,8 @@ fn despawn_dead_enemies(
                 },
             ));
 
-            // Despawn enemy with its sprite children
-            let mut entity_commands = commands.entity(entity);
-            entity_commands.despawn_children();
-            entity_commands.despawn();
+            // Despawn sprite children (but not the entity itself - logic system does that)
+            commands.entity(entity).despawn_children();
         }
     }
 }

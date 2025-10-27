@@ -52,7 +52,7 @@ fn main() {
         .add_plugins(AnimationPlugin)
         .add_plugins(ResourcesPlugin)
         .add_plugins(WorldPlugin)
-        .add_plugins(EnemyPlugin)
+        .add_plugins(EnemyPlugin::default())
         .add_plugins(CollisionPlugin)
         .add_plugins(ParticleEffectsPlugin)
         .run();
