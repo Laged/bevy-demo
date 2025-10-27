@@ -47,7 +47,7 @@ fn main() {
         .insert_resource(config)
         .add_plugins(FollowCameraPlugin)
         .add_plugins(GuiPlugin)
-        .add_plugins(GunPlugin)
+        .add_plugins(GunPlugin::default())
         .add_plugins(PlayerPlugin)
         .add_plugins(AnimationPlugin)
         .add_plugins(ResourcesPlugin)
