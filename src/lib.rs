@@ -20,7 +20,6 @@ pub mod configs;
 pub mod enemy;
 pub mod gui;
 pub mod gun;
-pub mod particle_effects;
 pub mod player;
 pub mod plugin_mode;
 pub mod resources;
@@ -40,6 +39,11 @@ pub mod test_utils {
 // Backward compatibility - re-export benchmark_config
 pub mod benchmark_config {
     pub use crate::domains::testing::benchmarks::*;
+}
+
+// Backward compatibility - re-export particle_effects
+pub mod particle_effects {
+    pub use crate::domains::graphics::particles::*;
 }
 
 #[cfg(test)]

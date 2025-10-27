@@ -1,3 +1,10 @@
+//! Particle effects system - Owned by Graphics Agent
+//!
+//! Manages visual particle effects using bevy_hanabi:
+//! - Bullet trails
+//! - Hit impacts with color matching
+//! - Death bursts and lingering effects
+
 use bevy::prelude::*;
 use bevy_hanabi::prelude::*;
 

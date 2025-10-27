@@ -2,6 +2,8 @@
 //!
 //! Particles, animations, sprites
 
+pub mod particles;
+
 use bevy::prelude::*;
 
 pub struct GraphicsPlugin;
