@@ -1,6 +1,6 @@
 # Performance Benchmark System Implementation Plan (v2 - Using Headless Infrastructure)
 
-> **STATUS: ✅ COMPLETED - Merged to dev branch**
+> **STATUS: ✅ COMPLETED - Merged to dev branch (commit dc4ec77)**
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
@@ -9,6 +9,11 @@
 **Architecture:** Integration test using `test_utils` for app creation. Much simpler than original plan since headless infrastructure handles plugin setup, entity spawning, and state management.
 
 **Tech Stack:** Bevy 0.17.2, bevy_hanabi 0.17.0, test_utils module from restructured codebase
+
+**Post-Implementation Note:**
+- Added visibility hierarchy fix to prevent B0004 warnings in GPU rendering mode
+- Game now runs without panics or warnings in both headless and standard modes
+- All 6 tests passing
 
 ---
 
