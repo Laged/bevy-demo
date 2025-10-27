@@ -68,6 +68,27 @@ fn create_color_gradient(base_color: Color) -> bevy_hanabi::Gradient<Vec4> {
     gradient
 }
 
+/// Finds the closest color variant from the palette using RGB distance
+pub fn find_closest_effect_variant(
+    enemy_color: Color,
+    variants: &Vec<(Color, Handle<EffectAsset>)>,
+) -> Handle<EffectAsset> {
+    variants
+        .iter()
+        .min_by_key(|(palette_color, _)| {
+            // Simple RGB distance (Euclidean in RGB space)
+            let pal_lin = palette_color.to_linear();
+            let enemy_lin = enemy_color.to_linear();
+            let dr = (pal_lin.red - enemy_lin.red).abs();
+            let dg = (pal_lin.green - enemy_lin.green).abs();
+            let db = (pal_lin.blue - enemy_lin.blue).abs();
+            // Scale by 1000 for integer comparison precision
+            ((dr + dg + db) * 1000.0) as u32
+        })
+        .map(|(_, handle)| handle.clone())
+        .expect("Variant palette should not be empty")
+}
+
 fn setup_particle_assets(
     mut commands: Commands,
     mut effects: ResMut<Assets<EffectAsset>>,
