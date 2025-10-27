@@ -1,3 +1,6 @@
+// Core infrastructure
+pub mod core;
+
 pub mod animation;
 pub mod benchmark_config;
 pub mod camera;
