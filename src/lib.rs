@@ -76,4 +76,42 @@ mod tests {
         assert!(ENEMY_SPAWN_INTERVAL > 0.0, "Enemy spawn interval should be positive");
         assert!(KD_TREE_REFRESH_RATE > 0.0, "KD-tree refresh rate should be positive");
     }
+
+    #[test]
+    fn test_headless_app_creation() {
+        use crate::test_utils::app::create_headless_app;
+        use crate::test_utils::simulation::{set_state, get_state, run_frames};
+        use crate::test_utils::entities::{spawn_test_player, spawn_test_enemy};
+        use crate::enemy::EnemyType;
+        use crate::plugin_mode::PluginMode;
+        use crate::enemy::EnemyPlugin;
+        use crate::gun::GunPlugin;
+        use crate::player::PlayerPlugin;
+        use bevy::prelude::*;
+
+        // Create a headless app
+        let mut app = create_headless_app();
+
+        // Add headless plugins
+        app.add_plugins(PlayerPlugin::new(PluginMode::Headless))
+            .add_plugins(EnemyPlugin::new(PluginMode::Headless))
+            .add_plugins(GunPlugin::new(PluginMode::Headless));
+
+        // Verify state machine works
+        assert_eq!(get_state::<GameState>(&app), Some(GameState::Loading));
+
+        // Transition to InGame
+        set_state(&mut app, GameState::InGame);
+        assert_eq!(get_state::<GameState>(&app), Some(GameState::InGame));
+
+        // Spawn test entities
+        let _player = spawn_test_player(&mut app, Vec3::ZERO, 100.0);
+        let _enemy = spawn_test_enemy(&mut app, Vec3::new(50.0, 0.0, 0.0), 50.0, EnemyType::Green);
+
+        // Run simulation frames without crashing
+        run_frames(&mut app, 10);
+
+        // If we got here, headless mode works!
+        assert!(true);
+    }
 }

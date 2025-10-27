@@ -1,6 +1,7 @@
 //! Headless app creation and configuration for testing
 
 use bevy::prelude::*;
+use bevy::state::app::StatesPlugin;
 use crate::state::GameState;
 use crate::config_loader::GameConfig;
 
@@ -8,6 +9,7 @@ use crate::config_loader::GameConfig;
 ///
 /// Returns an App configured with:
 /// - MinimalPlugins (no rendering, windowing, or input)
+/// - StatesPlugin (for state machine support)
 /// - TimePlugin for frame timing (included in MinimalPlugins)
 /// - Game state machine initialized to Loading state
 /// - GameConfig resource loaded from config or defaults
@@ -26,6 +28,7 @@ pub fn create_headless_app() -> App {
 
     let mut app = App::new();
     app.add_plugins(MinimalPlugins)
+        .add_plugins(StatesPlugin)
         .init_state::<GameState>()
         .insert_resource(config);
 

@@ -1,6 +1,7 @@
 //! Simulation control utilities for stepping through frames and managing state
 
 use bevy::prelude::*;
+use bevy::state::state::FreelyMutableState;
 
 /// Runs the app for the specified number of frames.
 ///
@@ -27,7 +28,7 @@ pub fn run_frames(app: &mut App, num_frames: usize) {
 /// ```ignore
 /// set_state(&mut app, GameState::InGame);
 /// ```
-pub fn set_state<S: States>(app: &mut App, state: S) {
+pub fn set_state<S: States + FreelyMutableState>(app: &mut App, state: S) {
     app.world_mut().insert_resource(NextState::Pending(state));
     app.update();
 }
