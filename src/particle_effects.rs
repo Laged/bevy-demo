@@ -18,7 +18,12 @@ impl Plugin for ParticleEffectsPlugin {
 #[derive(Resource)]
 pub struct ParticleEffectAssets {
     pub bullet_trail: Handle<EffectAsset>,
-    pub impact_burst: Handle<EffectAsset>,
+    // Colored hit impact variants (palette_color, effect_handle)
+    pub impact_variants: Vec<(Color, Handle<EffectAsset>)>,
+    // Colored death burst variants (palette_color, effect_handle)
+    pub death_burst_variants: Vec<(Color, Handle<EffectAsset>)>,
+    // Shared lingering death effect (white/gray)
+    pub death_linger: Handle<EffectAsset>,
 }
 
 #[derive(Component)]
