@@ -1,4 +1,5 @@
 pub mod animation;
+pub mod benchmark_config;
 pub mod camera;
 pub mod collision;
 pub mod config_loader;
