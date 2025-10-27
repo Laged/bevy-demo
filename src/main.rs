@@ -48,7 +48,7 @@ fn main() {
         .add_plugins(FollowCameraPlugin)
         .add_plugins(GuiPlugin)
         .add_plugins(GunPlugin::default())
-        .add_plugins(PlayerPlugin)
+        .add_plugins(PlayerPlugin::default())
         .add_plugins(AnimationPlugin)
         .add_plugins(ResourcesPlugin)
         .add_plugins(WorldPlugin)

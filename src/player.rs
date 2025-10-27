@@ -2,8 +2,23 @@ use bevy::math::vec3;
 use bevy::prelude::*;
 
 use crate::state::GameState;
+use crate::plugin_mode::PluginMode;
 
-pub struct PlayerPlugin;
+pub struct PlayerPlugin {
+    mode: PluginMode,
+}
+
+impl PlayerPlugin {
+    pub fn new(mode: PluginMode) -> Self {
+        Self { mode }
+    }
+}
+
+impl Default for PlayerPlugin {
+    fn default() -> Self {
+        Self::new(PluginMode::default())
+    }
+}
 
 #[derive(Component)]
 pub struct Player;
@@ -19,14 +34,19 @@ pub enum PlayerState {
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
+        // Logic systems (always run)
         app.add_systems(
             Update,
-            (
-                handle_player_death,
-                handle_player_input,
-            )
-                .run_if(in_state(GameState::InGame)),
+            handle_player_death.run_if(in_state(GameState::InGame)),
         );
+
+        // Input handling (only in Standard mode - requires keyboard)
+        if self.mode == PluginMode::Standard {
+            app.add_systems(
+                Update,
+                handle_player_input.run_if(in_state(GameState::InGame)),
+            );
+        }
     }
 }
 
