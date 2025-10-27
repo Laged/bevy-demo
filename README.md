@@ -94,6 +94,98 @@ cargo fmt --all
 cargo clippy --all-targets --all-features
 ```
 
+## Testing
+
+This project includes headless testing infrastructure that validates game logic without GPU rendering. This is critical for:
+- **LLM monitoring**: Automated agents can verify changes don't break gameplay
+- **Performance benchmarking**: Establish and maintain performance baselines
+- **CI/CD integration**: Fast, deterministic tests that run in any environment
+
+### Running Tests (For Humans)
+
+```bash
+# Run all tests
+cargo test
+
+# Run specific test with detailed output
+cargo test test_headless_app_creation -- --nocapture
+
+# Expected output shows:
+#   - State machine transitions
+#   - Entity spawning and persistence
+#   - Enemy AI behavior (movement toward player)
+#   - Performance metrics (17,000+ fps on headless simulation)
+#   - Component state inspection
+```
+
+### Performance Baselines (Gold Standards)
+
+**These performance criteria must NEVER regress:**
+
+| Metric | Baseline | Threshold | Description |
+|--------|----------|-----------|-------------|
+| 1000-frame simulation | ~19,000 fps | ≥15,000 fps | Full game logic execution speed |
+| Average frame time | ~52 µs | ≤67 µs | Per-frame processing time |
+| Enemy movement rate | 1.0 units/frame | Exact | AI behavior consistency |
+| Entity persistence | 100% | 100% | No entities lost during simulation |
+
+**Breaking these thresholds indicates a critical regression.**
+
+### For LLM Tools: Using Tests to Monitor Changes
+
+When modifying game logic, **always run the headless test** to verify:
+
+```bash
+cargo test test_headless_app_creation -- --nocapture
+```
+
+**What to check in the output:**
+
+1. **Performance Metrics**:
+   ```
+   1000 frames completed in ~50ms (≥15,000 fps required)
+   Average frame time: ≤67µs
+   ```
+   If fps drops below 15,000 or frame time exceeds 67µs → **performance regression detected**
+
+2. **Behavior Validation**:
+   ```
+   Enemy moved 10.00 units closer to player
+   Player position unchanged: true
+   ```
+   If enemy doesn't move exactly 10 units → **AI logic broken**
+   If player moves without input → **headless mode broken**
+
+3. **System Health Checklist**:
+   ```
+   ✓ State machine transitions work
+   ✓ Entities spawn and persist
+   ✓ Enemy AI movement toward player verified
+   ✓ Player stationary without input
+   ✓ Health systems operational
+   ```
+   Any ✗ indicates a broken subsystem → **investigate immediately**
+
+**Example: Detecting a Performance Regression**
+```diff
+# Before your change:
+1000 frames completed in 51.5ms (19,400 fps) ✓
+
+# After your change:
+1000 frames completed in 150ms (6,666 fps) ✗
+```
+**Action**: Your change introduced a 3x slowdown. Revert or optimize.
+
+**Example: Detecting Broken Logic**
+```diff
+# Before your change:
+Enemy moved 10.00 units closer to player ✓
+
+# After your change:
+Enemy moved 0.00 units closer to player ✗
+```
+**Action**: Enemy movement system is broken. Check `src/enemy.rs:update_enemy_transform`
+
 ### Development Workflow
 
 ```bash

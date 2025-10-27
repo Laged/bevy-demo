@@ -193,11 +193,25 @@ mod tests {
         // Behavior assertions
         println!("\n--- Behavior Validation ---");
 
+        // GOLD STANDARD: Enemy movement rate
+        const EXPECTED_MOVEMENT_PER_FRAME: f32 = 1.0;  // units per frame
+        const FRAMES_SIMULATED: usize = 10;
+        const EXPECTED_TOTAL_MOVEMENT: f32 = EXPECTED_MOVEMENT_PER_FRAME * FRAMES_SIMULATED as f32;
+
         // Enemy should move toward player (distance decreases)
         let distance_delta = initial_distance - final_distance;
         println!("Enemy moved {:.2} units closer to player", distance_delta);
+
         assert!(distance_delta > 0.0, "Enemy should move closer to player (distance decreased by {:.2})", distance_delta);
         assert!(final_enemy_pos.x < initial_enemy_pos.x, "Enemy X position should decrease (moving toward player at x=0)");
+
+        // GOLD STANDARD: Exact movement rate verification
+        assert_eq!(distance_delta, EXPECTED_TOTAL_MOVEMENT,
+            "BEHAVIOR REGRESSION: Enemy movement rate changed. \
+            Expected exactly {:.1} units in {} frames ({:.1} units/frame), \
+            but moved {:.2} units. Check src/enemy.rs:update_enemy_transform",
+            EXPECTED_TOTAL_MOVEMENT, FRAMES_SIMULATED, EXPECTED_MOVEMENT_PER_FRAME, distance_delta
+        );
 
         // Player should not move (no input in headless mode)
         println!("Player position unchanged: {}", initial_player_pos == final_player_pos);
@@ -215,11 +229,27 @@ mod tests {
         run_frames(&mut app, 1000);
         let long_elapsed = start.elapsed();
         let fps = 1000.0 / long_elapsed.as_secs_f64();
+        let avg_frame_time_us = long_elapsed.as_micros() as f64 / 1000.0;
         println!("1000 frames completed in {:?} ({:.2} fps)", long_elapsed, fps);
-        println!("Average frame time: {:.2} µs", long_elapsed.as_micros() as f64 / 1000.0);
+        println!("Average frame time: {:.2} µs", avg_frame_time_us);
 
-        // Performance assertion
-        assert!(long_elapsed.as_secs_f64() < 1.0, "1000 frames should complete in under 1 second (took {:?})", long_elapsed);
+        // GOLD STANDARD PERFORMANCE BASELINES - MUST NEVER REGRESS
+        const MIN_FPS: f64 = 15_000.0;          // Minimum acceptable fps for 1000-frame benchmark
+        const MAX_FRAME_TIME_US: f64 = 67.0;    // Maximum acceptable microseconds per frame
+
+        assert!(fps >= MIN_FPS,
+            "PERFORMANCE REGRESSION: fps ({:.2}) dropped below minimum threshold ({:.2}). \
+            This is a critical regression that must be fixed before merging.",
+            fps, MIN_FPS
+        );
+
+        assert!(avg_frame_time_us <= MAX_FRAME_TIME_US,
+            "PERFORMANCE REGRESSION: Average frame time ({:.2}µs) exceeded maximum threshold ({:.2}µs). \
+            This is a critical regression that must be fixed before merging.",
+            avg_frame_time_us, MAX_FRAME_TIME_US
+        );
+
+        println!("✓ Performance meets gold standard (≥{:.0} fps, ≤{:.0}µs/frame)", MIN_FPS, MAX_FRAME_TIME_US);
 
         println!("\n=== Test Passed! Headless mode works correctly ===");
         println!("Summary:");
