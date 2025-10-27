@@ -2,6 +2,8 @@
 //!
 //! Balance, spawning, combat, state machine
 
+pub mod config;
+
 use bevy::prelude::*;
 
 pub struct GameplayPlugin;

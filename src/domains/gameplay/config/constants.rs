@@ -1,3 +1,11 @@
+//! Game configuration constants - Owned by Gameplay Agent
+//!
+//! All game tuning values:
+//! - Window dimensions
+//! - Sprite configuration
+//! - Player/enemy/bullet stats
+//! - Timing values
+
 // Window
 pub const WW: f32 = 1200.0;
 pub const WH: f32 = 900.0;

@@ -13,8 +13,6 @@ pub mod domains {
 pub mod entities;
 
 pub mod collision;
-pub mod config_loader;
-pub mod configs;
 pub mod enemy;
 pub mod gun;
 pub mod player;
@@ -23,9 +21,10 @@ pub mod resources;
 pub mod state;
 pub mod world;
 
-pub use config_loader::GameConfig;
-pub use configs::*;
 pub use resources::*;
+
+// Re-export config types for backward compatibility
+pub use domains::gameplay::config::{GameConfig, *};
 
 // Backward compatibility - re-export test_utils
 #[cfg(test)]
@@ -56,6 +55,16 @@ pub mod gui {
 // Backward compatibility - re-export camera
 pub mod camera {
     pub use crate::domains::ui::camera::*;
+}
+
+// Backward compatibility - re-export config_loader
+pub mod config_loader {
+    pub use crate::domains::gameplay::config::loader::*;
+}
+
+// Backward compatibility - re-export configs
+pub mod configs {
+    pub use crate::domains::gameplay::config::constants::*;
 }
 
 #[cfg(test)]

@@ -1,3 +1,8 @@
+//! Configuration file loader - Owned by Gameplay Agent
+//!
+//! Loads game configuration from game_config.toml or provides defaults.
+//! All gameplay parameters are defined here.
+
 use bevy::prelude::Resource;
 use serde::Deserialize;
 use std::fs;
