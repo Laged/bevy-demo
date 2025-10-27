@@ -4,8 +4,8 @@ use bevy::{prelude::*, time::common_conditions::on_timer};
 use kd_tree::{KdPoint, KdTree};
 
 use crate::player::{Player, Health};
-use crate::{enemy::Enemy, gun::Bullet, state::GameState};
-use crate::particle_effects::{ImpactEffect, ParticleEffectAssets};
+use crate::{enemy::{Enemy, EnemyColor}, gun::Bullet, state::GameState};
+use crate::particle_effects::{ImpactEffect, ParticleEffectAssets, find_closest_effect_variant};
 use bevy_hanabi::prelude::*;
 
 pub struct CollisionPlugin;
@@ -77,7 +77,7 @@ fn handle_enemy_bullet_collision(
     mut commands: Commands,
     bullet_query: Query<(Entity, &Transform), With<Bullet>>,
     tree: Res<EnemyKdTree>,
-    mut enemy_query: Query<(&Transform, &mut Enemy), With<Enemy>>,
+    mut enemy_query: Query<(&Transform, &mut Enemy, &EnemyColor), With<Enemy>>,
     config: Res<crate::config_loader::GameConfig>,
     particle_assets: Res<ParticleEffectAssets>,
 ) {
@@ -90,15 +90,24 @@ fn handle_enemy_bullet_collision(
         let enemies = tree.0.within_radius(&[pos.x, pos.y], 50.0);
 
         for e in enemies {
-            if let Ok((_, mut enemy)) = enemy_query.get_mut(e.entity) {
+            if let Ok((_, mut enemy, enemy_color)) = enemy_query.get_mut(e.entity) {
                 enemy.health -= config.gun.bullet_damage;
 
-                // Spawn impact effect at bullet position
+                // Find closest matching color variant from palette
+                let impact_effect = find_closest_effect_variant(
+                    enemy_color.0,
+                    &particle_assets.impact_variants,
+                );
+
+                // Spawn colored impact burst
                 commands.spawn((
-                    ParticleEffect::new(particle_assets.impact_burst.clone()),
+                    ParticleEffect::new(impact_effect),
                     Transform::from_translation(pos),
                     ImpactEffect {
-                        lifetime: Timer::from_seconds(config.particle_effects.impact_lifetime, TimerMode::Once),
+                        lifetime: Timer::from_seconds(
+                            config.particle_effects.impact_lifetime,
+                            TimerMode::Once
+                        ),
                     },
                 ));
             }
