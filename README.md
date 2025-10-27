@@ -54,6 +54,59 @@ Start with `docs-shooter/game/00_INDEX.md` to understand the shipped experience,
 
 **STRONG ENFORCEMENT:** Before ANY Bevy 0.17 research or implementation, you MUST check these skills first. No exceptions. See CLAUDE.md "MANDATORY: Local Bevy Skills First" for the complete workflow.
 
+## Architecture: Domain-Driven Design
+
+The codebase uses a domain-driven architecture optimized for parallel agent development:
+
+```
+src/
+├── core/               # Shared infrastructure (Gameplay Agent owns)
+│   ├── events.rs       # Cross-domain events (Trigger/Observer pattern)
+│   ├── choice_system.rs# Extensible choice/pause system
+│   ├── state.rs        # Game state machine
+│   ├── collision.rs    # KD-tree collision detection
+│   └── resources.rs    # Asset loading and global resources
+│
+├── entities/           # Entity definitions (Gameplay Agent owns)
+│   ├── player.rs       # Player component and systems
+│   ├── enemy.rs        # Enemy spawning and AI
+│   └── world.rs        # World decoration
+│
+├── domains/
+│   ├── ui/             # UI Agent owns
+│   │   ├── hud.rs      # HUD, menus, debug overlay
+│   │   └── camera.rs   # Camera follow system
+│   │
+│   ├── gameplay/       # Gameplay Agent owns
+│   │   ├── config/     # Game configuration
+│   │   └── combat.rs   # Gun and bullet systems
+│   │
+│   ├── graphics/       # Graphics Agent owns
+│   │   ├── particles.rs# Particle effects
+│   │   └── animation.rs# Sprite animations
+│   │
+│   └── testing/        # Testing Agent owns
+│       ├── harness.rs  # Headless test app
+│       ├── helpers.rs  # Test entity spawners
+│       ├── simulation.rs # Frame stepping utilities
+│       └── benchmarks.rs # Performance configs
+│
+└── plugin_mode.rs      # Headless/Visual mode switching
+```
+
+**Domain Ownership:**
+- **UI Agent**: Owns `domains/ui/` (HUD, menus, camera)
+- **Gameplay Agent**: Owns `core/`, `entities/`, and `domains/gameplay/` (balance, spawning, combat, state machine)
+- **Graphics Agent**: Owns `domains/graphics/` (particles, animations)
+- **Testing Agent**: Owns `domains/testing/` (test harness, benchmarks)
+
+**Communication:**
+- Domains are loosely coupled via `core/events.rs` (using Bevy 0.17 Trigger/Observer pattern)
+- Shared state lives in `core/` (read-only for most domains)
+- Entity definitions in `entities/` are read by all domains
+
+See `src/domains/*/README.md` for detailed module documentation.
+
 ## Full Installation Guide
 
 ### Quick Start with Nix (Recommended)
